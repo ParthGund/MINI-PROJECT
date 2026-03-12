@@ -549,7 +549,9 @@ async function enterBookingQueue() {
     try {
         if (bookMode === 'queue') {
             // ── QUEUE MODE: call the real backend queue endpoint ───────────────
+            const user = JSON.parse(localStorage.getItem(USER_KEY));
             const payload = {
+                userId: user?.id,
                 trainId,
                 date      : journeyDate,
                 type      : bookType,
@@ -567,8 +569,33 @@ async function enterBookingQueue() {
             }
             const { position, queueLength } = await res.json();
 
-            // Show inline queue status panel (no page reload)
-            showQueueStatusPanel(position, queueLength);
+            // Store userId in localStorage for queue persistence
+            if (user?.id) {
+                localStorage.setItem('queueUserId', user.id);
+            }
+
+            // Store first passenger's preferences as preferredSeats (map text to numbers)
+            if (passengers.length > 0) {
+                const firstPax = passengers[0];
+                const prefMap = { 'lower': 10, 'middle': 11, 'upper': 12, 'window': 13, 'none': 0 };
+                const prefSeats = firstPax.preferences
+                    .map(p => prefMap[p] || 0)
+                    .filter(s => s !== 0);  // Remove "none" entries
+                localStorage.setItem('preferredSeats', JSON.stringify(prefSeats.length > 0 ? prefSeats : [0]));
+
+                // Store first passenger details for ticket confirmation
+                localStorage.setItem('tempPassengerDetails', JSON.stringify({
+                    name: firstPax.name,
+                    age: firstPax.age,
+                    gender: firstPax.gender,
+                    date: journeyDate,
+                    preferences: firstPax.preferences,
+                }));
+            }
+
+            // Redirect to queue booking page for seat selection
+            window.location.href = `queue-booking.html?trainId=${encodeURIComponent(trainId)}&date=${encodeURIComponent(journeyDate)}&type=${encodeURIComponent(bookType)}`;
+            return; // Stop execution here
 
         } else {
             // ── NORMAL / TATKAL MODE: stub — replace with real booking API later
