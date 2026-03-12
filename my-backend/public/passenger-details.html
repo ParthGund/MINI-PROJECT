@@ -834,6 +834,73 @@
                 grid-template-columns: 1fr;
             }
         }
+        /* ── Queue status panel (shown after joining queue) ─────────────────── */
+        .queue-status-panel {
+            display: none;
+            background: linear-gradient(135deg, rgba(129, 140, 248, .12), rgba(99, 102, 241, .06));
+            border: 1px solid rgba(129, 140, 248, .35);
+            border-radius: 18px;
+            padding: 28px 32px;
+            animation: fadeUp .4s ease both;
+        }
+
+        .queue-status-panel.show {
+            display: block;
+        }
+
+        .qs-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #e2e8f0;
+            margin-bottom: 6px;
+        }
+
+        .qs-sub {
+            font-size: 13px;
+            color: rgba(148, 163, 184, .7);
+            margin-bottom: 22px;
+        }
+
+        .qs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .qs-cell {
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .qs-cell .qs-val {
+            font-size: 26px;
+            font-weight: 800;
+            color: #a5b4fc;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .qs-cell .qs-lbl {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(148, 163, 184, .55);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+        .qs-note {
+            font-size: 12px;
+            color: rgba(148, 163, 184, .5);
+            text-align: center;
+        }
+
+        @media (max-width: 640px) {
+            .qs-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 
@@ -967,6 +1034,27 @@
                 </svg>
                 <span id="cta-btn-label">Loading…</span>
             </button>
+
+            <!-- 8. Queue status panel — shown after user joins the queue -->
+            <div class="queue-status-panel" id="queue-status-panel" role="status" aria-live="polite">
+                <div class="qs-title">🟣 You are in the booking queue</div>
+                <div class="qs-sub">Your details have been submitted. Please wait for your booking to be processed.</div>
+                <div class="qs-grid">
+                    <div class="qs-cell">
+                        <div class="qs-val" id="qs-position">—</div>
+                        <div class="qs-lbl">Your Position</div>
+                    </div>
+                    <div class="qs-cell">
+                        <div class="qs-val" id="qs-ahead">—</div>
+                        <div class="qs-lbl">People Ahead</div>
+                    </div>
+                    <div class="qs-cell">
+                        <div class="qs-val" id="qs-wait">—</div>
+                        <div class="qs-lbl">Est. Wait (min)</div>
+                    </div>
+                </div>
+                <div class="qs-note">The queue is processed every 2 minutes · Do not reload this page</div>
+            </div>
 
         </div><!-- /.content -->
     </div><!-- /.main -->

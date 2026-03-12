@@ -480,29 +480,50 @@ document.getElementById('success-modal')?.addEventListener('click', e => {
 });
 
 // ────────────────────────────────────────────────────────────────────────────
+//  Queue status panel
+// ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Hide the CTA button and reveal the queue status panel populated with
+ * position data returned by POST /api/queue/join.
+ *
+ * @param {number} position   - queue position number returned by the server
+ * @param {number} queueLength - total entries currently in the queue
+ */
+function showQueueStatusPanel(position, queueLength) {
+    // Hide the CTA button to prevent multiple joins
+    const btn = document.getElementById('enter-queue-btn');
+    if (btn) btn.style.display = 'none';
+
+    // Populate values
+    const ahead = position - 1;
+    const waitMin = ahead * 2;   // each position = 2-minute processing cycle
+
+    const posEl  = document.getElementById('qs-position');
+    const aheadEl = document.getElementById('qs-ahead');
+    const waitEl  = document.getElementById('qs-wait');
+
+    if (posEl)   posEl.textContent  = `#${position}`;
+    if (aheadEl) aheadEl.textContent = ahead;
+    if (waitEl)  waitEl.textContent  = waitMin === 0 ? '<1' : waitMin;
+
+    // Show the panel
+    const panel = document.getElementById('queue-status-panel');
+    if (panel) {
+        panel.classList.add('show');
+        panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 //  Enter Booking Queue — main CTA handler
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
  * Triggered by the CTA button ("Book Seats" for normal mode, "Enter Queue" for queue mode).
  *
- * Steps:
- *   1. Validate all passenger forms → surface any errors
- *   2. Collect form data into a clean passengers[] array
- *   3. STUB: simulate queue/booking API call (replace with real POST later)
- *   4. Show mode-appropriate success modal on completion
- *
- * ── TO ADD QUEUE LOGIC ────────────────────────────────────────────────────
- * Replace `await simulateQueueSubmission(passengers)` with:
- *
- *   const res = await fetch(`/api/trains/${trainId}/passenger-queue`, {
- *     method : 'POST',
- *     headers: { 'Content-Type': 'application/json',
- *                'Authorization': `Bearer ${localStorage.getItem('rc_token')}` },
- *     body   : JSON.stringify({ mode: bookMode, seats: selectedSeats, passengers })
- *   });
- *   if (!res.ok) throw new Error((await res.json().catch(()=>({}))).message || 'Request failed');
- * ─────────────────────────────────────────────────────────────────────────
+ * Queue mode  → POST /api/queue/join  → show inline queue status panel
+ * Normal mode → simulateQueueSubmission (stub) → show success modal
  */
 async function enterBookingQueue() {
     clearGlobalError();
@@ -513,7 +534,6 @@ async function enterBookingQueue() {
     // ── Step 1: Validate ───────────────────────────────────────────
     if (!validateAll()) {
         showGlobalError('Please fix the errors in the forms above before continuing.');
-        // Scroll to first visible error field
         const firstErr = document.querySelector('.ferr.on, .finput.err, .fselect.err');
         if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
@@ -522,15 +542,39 @@ async function enterBookingQueue() {
     // ── Step 2: Collect ────────────────────────────────────────────
     const passengers = collectData();
 
-    // ── Step 3: Submit (stub) ──────────────────────────────────────
+    // ── Step 3: Disable button immediately (prevent double-click) ────────
     const loadingLabel = bookMode === 'normal' ? 'Booking Seats…' : 'Joining Queue…';
     if (btn) { btn.disabled = true; btn.innerHTML = `<span class="spin"></span>${loadingLabel}`; }
 
     try {
-        await simulateQueueSubmission(passengers);   // ← replace with real API later
+        if (bookMode === 'queue') {
+            // ── QUEUE MODE: call the real backend queue endpoint ───────────────
+            const payload = {
+                trainId,
+                date      : journeyDate,
+                type      : bookType,
+                seats     : selectedSeats,
+                passengers,
+            };
+            const res = await fetch('/api/queue/join', {
+                method  : 'POST',
+                headers : { 'Content-Type': 'application/json' },
+                body    : JSON.stringify(payload),
+            });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.message || `Server error ${res.status}`);
+            }
+            const { position, queueLength } = await res.json();
 
-        // ── Step 4: Success modal ──────────────────────────────────────
-        showSuccessModal(passengers);
+            // Show inline queue status panel (no page reload)
+            showQueueStatusPanel(position, queueLength);
+
+        } else {
+            // ── NORMAL / TATKAL MODE: stub — replace with real booking API later
+            await simulateQueueSubmission(passengers);
+            showSuccessModal(passengers);
+        }
 
     } catch (err) {
         showGlobalError(err.message || 'Failed to submit. Please try again.');
