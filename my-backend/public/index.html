@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RailConnect — Sign In</title>
+  <meta name="description" content="Sign in or create an account on RailConnect."/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *{font-family:'Inter',sans-serif;box-sizing:border-box}
+    body{min-height:100vh;overflow:hidden;background:#020817}
+    .bg-anim{position:fixed;inset:0;z-index:0;
+      background:radial-gradient(ellipse at 20% 50%,rgba(14,165,233,.15) 0%,transparent 60%),
+                 radial-gradient(ellipse at 80% 20%,rgba(249,115,22,.12) 0%,transparent 55%),
+                 radial-gradient(ellipse at 60% 80%,rgba(6,182,212,.10) 0%,transparent 50%),#020817;
+      animation:bgPulse 8s ease-in-out infinite alternate}
+    @keyframes bgPulse{0%{opacity:1}50%{opacity:.85}100%{opacity:1}}
+    .orb{position:fixed;border-radius:50%;filter:blur(80px);z-index:0;pointer-events:none;animation:floatOrb 12s ease-in-out infinite alternate}
+    .orb-1{width:500px;height:500px;background:rgba(14,165,233,.18);top:-150px;left:-100px;animation-duration:14s}
+    .orb-2{width:400px;height:400px;background:rgba(249,115,22,.14);bottom:-120px;right:-80px;animation-duration:10s;animation-delay:-4s}
+    .orb-3{width:300px;height:300px;background:rgba(6,182,212,.12);top:40%;left:60%;animation-duration:16s;animation-delay:-2s}
+    @keyframes floatOrb{0%{transform:translate(0,0) scale(1)}100%{transform:translate(30px,20px) scale(1.08)}}
+    .grid-ov{position:fixed;inset:0;z-index:0;opacity:.04;
+      background-image:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),
+                       linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px);
+      background-size:50px 50px}
+    .glass{background:rgba(255,255,255,.04);backdrop-filter:blur(24px) saturate(180%);
+      -webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,.10);
+      box-shadow:0 8px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)}
+    .fi{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:12px;
+      padding:12px 16px;color:#f1f5f9;font-size:14px;outline:none;transition:.25s}
+    .fi::placeholder{color:rgba(148,163,184,.7)}
+    .fi:focus{border-color:rgba(14,165,233,.6);background:rgba(14,165,233,.06);box-shadow:0 0 0 3px rgba(14,165,233,.12)}
+    .iw{position:relative}
+    .ii{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(148,163,184,.7);pointer-events:none}
+    .iw .fi{padding-left:42px}
+    .eyebtn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;
+      color:rgba(148,163,184,.7);transition:color .2s;line-height:1}
+    .eyebtn:hover{color:#0ea5e9}
+    .btn-p{width:100%;padding:13px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;
+      background:linear-gradient(135deg,#0ea5e9 0%,#06b6d4 50%,#f97316 100%);background-size:200% 200%;color:#fff;
+      transition:all .3s;animation:gradShift 4s ease infinite;letter-spacing:.3px}
+    .btn-p:hover:not(:disabled){box-shadow:0 8px 30px rgba(14,165,233,.4);transform:translateY(-1px)}
+    .btn-p:disabled{opacity:.65;cursor:not-allowed;animation:none}
+    @keyframes gradShift{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+    .spin{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+      border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:8px}
+    @keyframes sp{to{transform:rotate(360deg)}}
+    .tab-b{flex:1;padding:10px;font-size:14px;font-weight:600;border-radius:10px;border:none;background:transparent;
+      cursor:pointer;transition:all .3s;color:rgba(148,163,184,.8)}
+    .tab-b.active{background:linear-gradient(135deg,rgba(14,165,233,.2),rgba(6,182,212,.15));color:#38bdf8;
+      border:1px solid rgba(14,165,233,.3);box-shadow:0 2px 12px rgba(14,165,233,.15)}
+    .al{border-radius:10px;padding:11px 14px;font-size:13.5px;font-weight:500;display:flex;align-items:flex-start;gap:8px}
+    .al-err{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#fca5a5}
+    .al-ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:#86efac}
+    .logoi{background:linear-gradient(135deg,#0ea5e9,#06b6d4);border-radius:14px;width:48px;height:48px;
+      display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(14,165,233,.35)}
+    .fp{transition:opacity .3s ease,transform .3s ease}
+    .fp-h{opacity:0;pointer-events:none;transform:translateX(10px);position:absolute;width:100%}
+    .fp-a{opacity:1;transform:translateX(0);position:relative}
+    .fc{position:relative;overflow:hidden}
+    .dv{display:flex;align-items:center;gap:12px}
+    .dv hr{flex:1;border:none;border-top:1px solid rgba(255,255,255,.08)}
+    .dv span{font-size:12px;color:rgba(148,163,184,.5);white-space:nowrap}
+    label{font-size:13px;font-weight:500;color:rgba(148,163,184,.9);display:block;margin-bottom:6px}
+    .fb{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(148,163,184,.8)}
+    .fb .dot{width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,#0ea5e9,#06b6d4);flex-shrink:0}
+    @keyframes cIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+  <div class="bg-anim"></div>
+  <div class="grid-ov"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="glass rounded-2xl w-full max-w-md p-8 relative z-10" style="animation:cIn .5s ease both">
+    <!-- Logo -->
+    <div class="flex flex-col items-center mb-8">
+      <div class="logoi mb-4">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 10c0-4.5 3-7 8-7s8 2.5 8 7l-2 8H6l-2-8z"/>
+          <line x1="8" y1="19" x2="7" y2="22"/><line x1="16" y1="19" x2="17" y2="22"/>
+          <line x1="4" y1="14" x2="20" y2="14"/>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-white tracking-tight">RailConnect</h1>
+      <p class="text-sm text-slate-400 mt-1">Premium Railway Booking Platform</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-2 p-1 rounded-xl mb-6" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)">
+      <button id="tab-login" class="tab-b active" onclick="switchTab('login')">Sign In</button>
+      <button id="tab-signup" class="tab-b" onclick="switchTab('signup')">Create Account</button>
+    </div>
+
+    <div class="fc">
+      <!-- LOGIN PANEL -->
+      <div id="panel-login" class="fp fp-a">
+        <div id="login-alert" class="al al-err mb-5 hidden"></div>
+        <form id="login-form" onsubmit="handleLogin(event)" novalidate>
+          <div class="mb-4">
+            <label for="login-email">Email Address</label>
+            <div class="iw">
+              <span class="ii"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg></span>
+              <input id="login-email" type="email" class="fi" placeholder="you@example.com" autocomplete="email"/>
+            </div>
+          </div>
+          <div class="mb-6">
+            <label for="login-password">Password</label>
+            <div class="iw">
+              <span class="ii"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <input id="login-password" type="password" class="fi" placeholder="••••••••" autocomplete="current-password" style="padding-right:44px"/>
+              <button type="button" class="eyebtn" onclick="togglePassword('login-password',this)" aria-label="Toggle visibility">
+                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <button id="login-btn" type="submit" class="btn-p">Sign In</button>
+        </form>
+        <div class="dv my-5"><hr/><span>or</span><hr/></div>
+        <p class="text-center text-sm text-slate-400">Don't have an account?
+          <button onclick="switchTab('signup')" class="text-sky-400 font-semibold hover:text-sky-300 transition-colors ml-1">Create one free →</button>
+        </p>
+      </div>
+
+      <!-- SIGNUP PANEL -->
+      <div id="panel-signup" class="fp fp-h">
+        <div id="signup-alert" class="mb-5 hidden"></div>
+        <form id="signup-form" onsubmit="handleSignup(event)" novalidate>
+          <div class="mb-4">
+            <label for="signup-name">Full Name</label>
+            <div class="iw">
+              <span class="ii"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>
+              <input id="signup-name" type="text" class="fi" placeholder="Parth Sharma" autocomplete="name"/>
+            </div>
+          </div>
+          <div class="mb-4">
+            <label for="signup-email">Email Address</label>
+            <div class="iw">
+              <span class="ii"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg></span>
+              <input id="signup-email" type="email" class="fi" placeholder="you@example.com" autocomplete="email"/>
+            </div>
+          </div>
+          <div class="mb-6">
+            <label for="signup-password">Password</label>
+            <div class="iw">
+              <span class="ii"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <input id="signup-password" type="password" class="fi" placeholder="Min. 6 characters" autocomplete="new-password" style="padding-right:44px"/>
+              <button type="button" class="eyebtn" onclick="togglePassword('signup-password',this)" aria-label="Toggle visibility">
+                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <button id="signup-btn" type="submit" class="btn-p">Create Account</button>
+        </form>
+        <div class="dv my-5"><hr/><span>or</span><hr/></div>
+        <p class="text-center text-sm text-slate-400">Already have an account?
+          <button onclick="switchTab('login')" class="text-sky-400 font-semibold hover:text-sky-300 transition-colors ml-1">Sign in →</button>
+        </p>
+      </div>
+    </div>
+
+    <!-- Feature strip -->
+    <div class="mt-7 pt-5" style="border-top:1px solid rgba(255,255,255,.06)">
+      <div class="flex flex-wrap justify-center gap-x-6 gap-y-2">
+        <div class="fb"><span class="dot"></span>Secure JWT Auth</div>
+        <div class="fb"><span class="dot"></span>Instant Booking</div>
+        <div class="fb"><span class="dot"></span>Live PNR Status</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

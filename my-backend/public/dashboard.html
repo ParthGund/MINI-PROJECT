@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RailConnect — Dashboard</title>
+    <meta name="description" content="Your RailConnect dashboard — manage bookings, PNR status, and profile." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box
+        }
+
+        body {
+            background: #020817;
+            color: #f1f5f9;
+            min-height: 100vh;
+            display: flex
+        }
+
+        /* Background */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: radial-gradient(ellipse at 0% 0%, rgba(14, 165, 233, .10) 0%, transparent 55%),
+                radial-gradient(ellipse at 100% 100%, rgba(249, 115, 22, .08) 0%, transparent 55%), #020817
+        }
+
+        .grid-ov {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            opacity: .025;
+            background-image: linear-gradient(rgba(255, 255, 255, .8) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, .8) 1px, transparent 1px);
+            background-size: 40px 40px
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, .03);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid rgba(255, 255, 255, .07);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+            transition: width .3s
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 8px 28px;
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
+            margin-bottom: 20px
+        }
+
+        .logoi {
+            background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(14, 165, 233, .3);
+            flex-shrink: 0
+        }
+
+        .logo-text h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2
+        }
+
+        .logo-text p {
+            font-size: 11px;
+            color: rgba(148, 163, 184, .6);
+            margin-top: 1px
+        }
+
+        .nav-section-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .08em;
+            color: rgba(148, 163, 184, .4);
+            text-transform: uppercase;
+            padding: 0 12px;
+            margin-bottom: 6px;
+            margin-top: 16px
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(148, 163, 184, .8);
+            cursor: pointer;
+            transition: all .2s;
+            border: 1px solid transparent;
+            text-decoration: none;
+            margin-bottom: 2px
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, .05);
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, .06)
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(14, 165, 233, .18), rgba(6, 182, 212, .12));
+            color: #38bdf8;
+            border-color: rgba(14, 165, 233, .25);
+            box-shadow: 0 2px 16px rgba(14, 165, 233, .10)
+        }
+
+        .nav-item .icon {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            opacity: .8
+        }
+
+        .nav-item.active .icon {
+            opacity: 1
+        }
+
+        .nav-item-badge {
+            margin-left: auto;
+            background: rgba(249, 115, 22, .2);
+            border: 1px solid rgba(249, 115, 22, .3);
+            color: #fb923c;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, .06)
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .07);
+            margin-bottom: 10px
+        }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0ea5e9, #f97316);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0
+        }
+
+        .user-info .name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #e2e8f0;
+            line-height: 1.3
+        }
+
+        .user-info .email-text {
+            font-size: 11px;
+            color: rgba(148, 163, 184, .6)
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 11px 14px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, .08);
+            border: 1px solid rgba(239, 68, 68, .15);
+            color: #fca5a5;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .2s
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, .15);
+            border-color: rgba(239, 68, 68, .25);
+            color: #f87171
+        }
+
+        /* Main content */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+            overflow-y: auto
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
+            background: rgba(2, 8, 23, .7);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 5
+        }
+
+        .topbar-title h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff
+        }
+
+        .topbar-title p {
+            font-size: 13px;
+            color: rgba(148, 163, 184, .7);
+            margin-top: 2px
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #34d399;
+            background: rgba(52, 211, 153, .10);
+            border: 1px solid rgba(52, 211, 153, .2);
+            padding: 5px 12px;
+            border-radius: 20px
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #34d399;
+            animation: pulse 2s infinite
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .4
+            }
+        }
+
+        /* Content area */
+        .content {
+            padding: 32px
+        }
+
+        /* Glass cards */
+        .card {
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, .3);
+            transition: transform .2s, box-shadow .2s
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, .4)
+        }
+
+        .card-gradient-1 {
+            background: linear-gradient(135deg, rgba(14, 165, 233, .15) 0%, rgba(6, 182, 212, .08) 100%);
+            border-color: rgba(14, 165, 233, .2)
+        }
+
+        .card-gradient-2 {
+            background: linear-gradient(135deg, rgba(249, 115, 22, .15) 0%, rgba(234, 88, 12, .08) 100%);
+            border-color: rgba(249, 115, 22, .2)
+        }
+
+        .card-gradient-3 {
+            background: linear-gradient(135deg, rgba(139, 92, 246, .15) 0%, rgba(124, 58, 237, .08) 100%);
+            border-color: rgba(139, 92, 246, .2)
+        }
+
+        .card-gradient-4 {
+            background: linear-gradient(135deg, rgba(52, 211, 153, .12) 0%, rgba(16, 185, 129, .06) 100%);
+            border-color: rgba(52, 211, 153, .18)
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+            font-size: 22px
+        }
+
+        .stat-num {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: rgba(148, 163, 184, .7);
+            margin-top: 4px
+        }
+
+        .stat-change {
+            font-size: 12px;
+            font-weight: 600;
+            color: #34d399;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 4px
+        }
+
+        .section-sub {
+            font-size: 13px;
+            color: rgba(148, 163, 184, .6);
+            margin-bottom: 20px
+        }
+
+        /* Quick action buttons */
+        .qbtn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, .08);
+            background: rgba(255, 255, 255, .04);
+            cursor: pointer;
+            transition: all .25s;
+            text-decoration: none
+        }
+
+        .qbtn:hover {
+            background: rgba(255, 255, 255, .08);
+            border-color: rgba(255, 255, 255, .15);
+            transform: translateY(-3px)
+        }
+
+        .qbtn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .qbtn span {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(148, 163, 184, .9)
+        }
+
+        /* Activity list */
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, .05)
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0
+        }
+
+        .act-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .act-info .act-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e2e8f0
+        }
+
+        .act-info .act-sub {
+            font-size: 12px;
+            color: rgba(148, 163, 184, .6);
+            margin-top: 2px
+        }
+
+        .act-badge {
+            margin-left: auto;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px
+        }
+
+        .badge-green {
+            background: rgba(52, 211, 153, .12);
+            border: 1px solid rgba(52, 211, 153, .2);
+            color: #34d399
+        }
+
+        .badge-orange {
+            background: rgba(249, 115, 22, .12);
+            border: 1px solid rgba(249, 115, 22, .2);
+            color: #fb923c
+        }
+
+        .badge-blue {
+            background: rgba(14, 165, 233, .12);
+            border: 1px solid rgba(14, 165, 233, .2);
+            color: #38bdf8
+        }
+
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, .06) 25%, rgba(255, 255, 255, .10) 50%, rgba(255, 255, 255, .06) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0
+            }
+
+            100% {
+                background-position: -200% 0
+            }
+        }
+
+        /* Profile section */
+        .profile-field {
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, .05)
+        }
+
+        .profile-field:last-child {
+            border-bottom: none
+        }
+
+        .pf-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(148, 163, 184, .5);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            margin-bottom: 4px
+        }
+
+        .pf-value {
+            font-size: 15px;
+            font-weight: 500;
+            color: #e2e8f0
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn .4s ease both
+        }
+
+        /* Mobile hamburger */
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px
+        }
+
+        @media(max-width:768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -260px;
+                height: 100%;
+                z-index: 50;
+                transition: left .3s;
+                width: 260px
+            }
+
+            .sidebar.open {
+                left: 0
+            }
+
+            .hamburger {
+                display: block
+            }
+
+            .content {
+                padding: 20px 16px
+            }
+
+            .topbar {
+                padding: 16px 20px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-layer"></div>
+    <div class="grid-ov"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="logoi">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 10c0-4.5 3-7 8-7s8 2.5 8 7l-2 8H6l-2-8z" />
+                    <line x1="8" y1="19" x2="7" y2="22" />
+                    <line x1="16" y1="19" x2="17" y2="22" />
+                    <line x1="4" y1="14" x2="20" y2="14" />
+                </svg>
+            </div>
+            <div class="logo-text">
+                <h2>RailConnect</h2>
+                <p>Booking Platform</p>
+            </div>
+        </div>
+
+        <div class="nav-section-label">Navigation</div>
+
+        <a href="#" class="nav-item active" id="nav-dashboard" onclick="showSection('dashboard',this)">
+            <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            Dashboard
+        </a>
+        <a href="#" class="nav-item" id="nav-bookings" onclick="showSection('bookings',this)">
+            <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path
+                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3H6a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3z" />
+            </svg>
+            Bookings
+            <span class="nav-item-badge">3</span>
+        </a>
+        <a href="#" class="nav-item" id="nav-pnr" onclick="showSection('pnr',this)">
+            <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path
+                    d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2m-4 0V3m0 2h4V3m-4 2H9V3" />
+                <line x1="9" y1="12" x2="15" y2="12" />
+                <line x1="9" y1="16" x2="13" y2="16" />
+            </svg>
+            PNR Status
+        </a>
+        <a href="#" class="nav-item" id="nav-profile" onclick="showSection('profile',this)">
+            <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+            Profile
+        </a>
+
+        <div class="sidebar-bottom">
+            <div class="user-chip">
+                <div class="avatar" id="sidebar-avatar">?</div>
+                <div class="user-info">
+                    <div class="name" id="sidebar-name">Loading...</div>
+                    <div class="email-text" id="sidebar-email">—</div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                Sign Out
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div style="display:flex;align-items:center;gap:12px">
+                <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"
+                    aria-label="Menu">
+                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <line x1="3" y1="12" x2="21" y2="12" />
+                        <line x1="3" y1="18" x2="21" y2="18" />
+                    </svg>
+                </button>
+                <div class="topbar-title">
+                    <h2 id="topbar-title">Dashboard</h2>
+                    <p id="topbar-subtitle">Welcome back, <span id="topbar-name"
+                            class="text-sky-400 font-semibold">loading...</span></p>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="status-badge"><span class="status-dot"></span>API Connected</div>
+            </div>
+        </header>
+
+        <!-- Sections (all hidden by default; JS shows active one) -->
+        <div class="content">
+
+            <!-- DASHBOARD SECTION -->
+            <div id="section-dashboard" class="fade-in">
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                    <div class="card card-gradient-1">
+                        <div class="stat-icon" style="background:rgba(14,165,233,.15)">🚆</div>
+                        <div class="stat-num">12</div>
+                        <div class="stat-label">Total Trips</div>
+                        <div class="stat-change">↑ 2 this month</div>
+                    </div>
+                    <div class="card card-gradient-2">
+                        <div class="stat-icon" style="background:rgba(249,115,22,.15)">🎟️</div>
+                        <div class="stat-num">3</div>
+                        <div class="stat-label">Active Bookings</div>
+                        <div class="stat-change" style="color:#fb923c">↗ Upcoming</div>
+                    </div>
+                    <div class="card card-gradient-3">
+                        <div class="stat-icon" style="background:rgba(139,92,246,.15)">📋</div>
+                        <div class="stat-num">7</div>
+                        <div class="stat-label">PNR Checked</div>
+                        <div class="stat-change">↑ 100% confirmed</div>
+                    </div>
+                    <div class="card card-gradient-4">
+                        <div class="stat-icon" style="background:rgba(52,211,153,.15)">✅</div>
+                        <div class="stat-num">9</div>
+                        <div class="stat-label">Completed</div>
+                        <div class="stat-change">↑ On time: 8</div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions + Recent Activity -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1">
+                        <div class="card">
+                            <div class="section-title">Quick Actions</div>
+                            <div class="section-sub">Jump right in</div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <a href="search.html" class="qbtn">
+                                    <div class="qbtn-icon" style="background:rgba(14,165,233,.15)">
+                                        <svg width="20" height="20" fill="none" stroke="#38bdf8" stroke-width="2"
+                                            viewBox="0 0 24 24">
+                                            <circle cx="11" cy="11" r="8" />
+                                            <path d="m21 21-4.4-4.4" />
+                                        </svg>
+                                    </div>
+                                    <span>Search Trains</span>
+                                </a>
+                                <a href="#" class="qbtn"
+                                    onclick="showSection('pnr',document.getElementById('nav-pnr'))">
+                                    <div class="qbtn-icon" style="background:rgba(249,115,22,.15)">
+                                        <svg width="20" height="20" fill="none" stroke="#fb923c" stroke-width="2"
+                                            viewBox="0 0 24 24">
+                                            <path
+                                                d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                                            <rect x="9" y="3" width="6" height="4" rx="1" />
+                                        </svg>
+                                    </div>
+                                    <span>Check PNR</span>
+                                </a>
+                                <a href="#" class="qbtn"
+                                    onclick="showSection('bookings',document.getElementById('nav-bookings'))">
+                                    <div class="qbtn-icon" style="background:rgba(139,92,246,.15)">
+                                        <svg width="20" height="20" fill="none" stroke="#a78bfa" stroke-width="2"
+                                            viewBox="0 0 24 24">
+                                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                            <polyline points="9 22 9 12 15 12 15 22" />
+                                        </svg>
+                                    </div>
+                                    <span>My Bookings</span>
+                                </a>
+                                <a href="#" class="qbtn"
+                                    onclick="showSection('profile',document.getElementById('nav-profile'))">
+                                    <div class="qbtn-icon" style="background:rgba(52,211,153,.15)">
+                                        <svg width="20" height="20" fill="none" stroke="#34d399" stroke-width="2"
+                                            viewBox="0 0 24 24">
+                                            <circle cx="12" cy="8" r="4" />
+                                            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                                        </svg>
+                                    </div>
+                                    <span>My Profile</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2">
+                        <div class="card">
+                            <div class="section-title">Recent Activity</div>
+                            <div class="section-sub">Your latest transactions</div>
+                            <div>
+                                <div class="activity-item">
+                                    <div class="act-icon" style="background:rgba(14,165,233,.12)">🚆</div>
+                                    <div class="act-info">
+                                        <div class="act-title">Mumbai → Delhi</div>
+                                        <div class="act-sub">Rajdhani Express · Jan 28, 2026</div>
+                                    </div>
+                                    <div class="act-badge badge-green">Confirmed</div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="act-icon" style="background:rgba(249,115,22,.12)">🎟️</div>
+                                    <div class="act-info">
+                                        <div class="act-title">Delhi → Jaipur</div>
+                                        <div class="act-sub">Shatabdi Express · Feb 5, 2026</div>
+                                    </div>
+                                    <div class="act-badge badge-orange">Waitlisted</div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="act-icon" style="background:rgba(52,211,153,.12)">✅</div>
+                                    <div class="act-info">
+                                        <div class="act-title">Pune → Bangalore</div>
+                                        <div class="act-sub">Deccan Queen · Feb 14, 2026</div>
+                                    </div>
+                                    <div class="act-badge badge-green">Completed</div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="act-icon" style="background:rgba(14,165,233,.12)">🔍</div>
+                                    <div class="act-info">
+                                        <div class="act-title">PNR Status Check</div>
+                                        <div class="act-sub">PNR #4521839204 · Today</div>
+                                    </div>
+                                    <div class="act-badge badge-blue">Checked</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOOKINGS SECTION -->
+            <div id="section-bookings" class="fade-in hidden">
+                <div class="card mb-6">
+                    <div class="section-title">My Bookings</div>
+                    <div class="section-sub">All your train reservations in one place</div>
+                    <div class="activity-item">
+                        <div class="act-icon" style="background:rgba(14,165,233,.12)">🚆</div>
+                        <div class="act-info">
+                            <div class="act-title">Mumbai → Delhi — Rajdhani Express</div>
+                            <div class="act-sub">Seat 24B · Sleeper · Dep. 06:00 AM · Jan 28, 2026</div>
+                        </div>
+                        <div class="act-badge badge-green">Confirmed</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="act-icon" style="background:rgba(249,115,22,.12)">🎟️</div>
+                        <div class="act-info">
+                            <div class="act-title">Delhi → Jaipur — Shatabdi Express</div>
+                            <div class="act-sub">WL/3 · AC Chair Car · Dep. 10:15 AM · Feb 5, 2026</div>
+                        </div>
+                        <div class="act-badge badge-orange">Waitlisted</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="act-icon" style="background:rgba(139,92,246,.12)">🚄</div>
+                        <div class="act-info">
+                            <div class="act-title">Kolkata → Chennai — Coromandel Express</div>
+                            <div class="act-sub">Seat 10C · 3AC · Dep. 08:30 PM · Mar 1, 2026</div>
+                        </div>
+                        <div class="act-badge badge-blue">Upcoming</div>
+                    </div>
+                </div>
+                <div class="card" style="background:rgba(14,165,233,.05);border-color:rgba(14,165,233,.15)">
+                    <p class="text-sm text-slate-400">Connect your backend booking API to display real reservation data
+                        here.</p>
+                </div>
+            </div>
+
+            <!-- PNR SECTION -->
+            <div id="section-pnr" class="fade-in hidden">
+                <div class="card mb-6">
+                    <div class="section-title">PNR Status Check</div>
+                    <div class="section-sub">Enter a 10-digit PNR number to get live status</div>
+                    <div style="display:flex;gap:10px;max-width:480px">
+                        <div style="flex:1;position:relative">
+                            <input id="pnr-input" type="text" maxlength="10" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
+                       border-radius:12px;padding:12px 16px;color:#f1f5f9;font-size:15px;outline:none;
+                       transition:.25s;letter-spacing:2px" placeholder="Enter PNR Number" />
+                        </div>
+                        <button onclick="checkPNR()" style="padding:12px 20px;border-radius:12px;border:none;font-size:14px;font-weight:600;
+              cursor:pointer;background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:#fff;white-space:nowrap;
+              transition:all .2s" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">
+                            Check Status
+                        </button>
+                    </div>
+                    <div id="pnr-result" class="mt-6 hidden">
+                        <div class="activity-item"
+                            style="border:1px solid rgba(52,211,153,.2);border-radius:12px;padding:16px;border-bottom:none;background:rgba(52,211,153,.04)">
+                            <div class="act-icon" style="background:rgba(52,211,153,.12)">✅</div>
+                            <div class="act-info">
+                                <div class="act-title" id="pnr-route">Route info</div>
+                                <div class="act-sub" id="pnr-details">Details</div>
+                            </div>
+                            <div class="act-badge badge-green" id="pnr-status">Confirmed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROFILE SECTION -->
+            <div id="section-profile" class="fade-in hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1">
+                        <div class="card text-center">
+                            <div style="width:80px;height:80px;border-radius:50%;
+                background:linear-gradient(135deg,#0ea5e9,#f97316);
+                display:flex;align-items:center;justify-content:center;
+                font-size:32px;font-weight:700;color:#fff;margin:0 auto 16px;" id="profile-avatar">?</div>
+                            <div class="text-white font-bold text-xl" id="profile-name">Loading…</div>
+                            <div class="text-slate-400 text-sm mt-1" id="profile-email">—</div>
+                            <div class="mt-4">
+                                <span class="act-badge badge-green" style="display:inline-block">Active Member</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <div class="card">
+                            <div class="section-title">Account Information</div>
+                            <div class="section-sub">Your profile data fetched from /api/users/profile</div>
+                            <div>
+                                <div class="profile-field">
+                                    <div class="pf-label">User ID</div>
+                                    <div class="pf-value" id="profile-id">—</div>
+                                </div>
+                                <div class="profile-field">
+                                    <div class="pf-label">Full Name</div>
+                                    <div class="pf-value" id="profile-fullname">—</div>
+                                </div>
+                                <div class="profile-field">
+                                    <div class="pf-label">Email Address</div>
+                                    <div class="pf-value" id="profile-email-field">—</div>
+                                </div>
+                                <div class="profile-field">
+                                    <div class="pf-label">Authentication</div>
+                                    <div class="pf-value"><span class="act-badge badge-blue"
+                                            style="display:inline-block;font-size:12px">JWT Token · Active</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!--/content-->
+    </div><!--/main-->
+
+    <script src="script.js"></script>
+</body>
+
+</html>

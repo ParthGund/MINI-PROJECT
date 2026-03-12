@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RailConnect — Search Trains</title>
+  <meta name="description" content="Search trains by source and destination on RailConnect." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { font-family: 'Inter', sans-serif; box-sizing: border-box }
+    body { background: #020817; color: #f1f5f9; min-height: 100vh; display: flex }
+
+    /* ── Background ── */
+    .bg-layer {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse at 0% 0%,   rgba(14,165,233,.10) 0%, transparent 55%),
+        radial-gradient(ellipse at 100% 100%, rgba(249,115,22,.08) 0%, transparent 55%),
+        #020817
+    }
+    .grid-ov {
+      position: fixed; inset: 0; z-index: 0; opacity: .025;
+      background-image: linear-gradient(rgba(255,255,255,.8) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,.8) 1px, transparent 1px);
+      background-size: 40px 40px
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 260px; min-height: 100vh; flex-shrink: 0; position: relative; z-index: 10;
+      background: rgba(255,255,255,.03); backdrop-filter: blur(24px);
+      border-right: 1px solid rgba(255,255,255,.07);
+      display: flex; flex-direction: column; padding: 24px 16px; transition: width .3s
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 12px; padding: 0 8px 28px;
+      border-bottom: 1px solid rgba(255,255,255,.06); margin-bottom: 20px
+    }
+    .logoi {
+      background: linear-gradient(135deg,#0ea5e9,#06b6d4); border-radius: 12px;
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(14,165,233,.3); flex-shrink: 0
+    }
+    .logo-text h2 { font-size: 16px; font-weight: 700; color: #fff; line-height: 1.2 }
+    .logo-text p  { font-size: 11px; color: rgba(148,163,184,.6); margin-top: 1px }
+    .nav-section-label {
+      font-size: 10px; font-weight: 600; letter-spacing: .08em;
+      color: rgba(148,163,184,.4); text-transform: uppercase;
+      padding: 0 12px; margin-bottom: 6px; margin-top: 16px
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px; padding: 11px 14px;
+      border-radius: 12px; font-size: 14px; font-weight: 500;
+      color: rgba(148,163,184,.8); cursor: pointer; transition: all .2s;
+      border: 1px solid transparent; text-decoration: none; margin-bottom: 2px
+    }
+    .nav-item:hover { background: rgba(255,255,255,.05); color: #e2e8f0; border-color: rgba(255,255,255,.06) }
+    .nav-item.active {
+      background: linear-gradient(135deg,rgba(14,165,233,.18),rgba(6,182,212,.12));
+      color: #38bdf8; border-color: rgba(14,165,233,.25); box-shadow: 0 2px 16px rgba(14,165,233,.10)
+    }
+    .nav-item .icon { width: 18px; height: 18px; flex-shrink: 0; opacity: .8 }
+    .nav-item.active .icon { opacity: 1 }
+    .sidebar-bottom { margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.06) }
+    .user-chip {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      border-radius: 12px; background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07); margin-bottom: 10px
+    }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg,#0ea5e9,#f97316);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0
+    }
+    .user-info .name { font-size: 13px; font-weight: 600; color: #e2e8f0; line-height: 1.3 }
+    .user-info .email-text { font-size: 11px; color: rgba(148,163,184,.6) }
+    .logout-btn {
+      display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 14px;
+      border-radius: 12px; background: rgba(239,68,68,.08);
+      border: 1px solid rgba(239,68,68,.15); color: #fca5a5;
+      font-size: 14px; font-weight: 500; cursor: pointer; transition: all .2s
+    }
+    .logout-btn:hover { background: rgba(239,68,68,.15); border-color: rgba(239,68,68,.25); color: #f87171 }
+
+    /* ── Main ── */
+    .main { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1; overflow-y: auto }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 32px; border-bottom: 1px solid rgba(255,255,255,.06);
+      background: rgba(2,8,23,.7); backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 5
+    }
+    .topbar-title h2 { font-size: 20px; font-weight: 700; color: #fff }
+    .topbar-title p  { font-size: 13px; color: rgba(148,163,184,.7); margin-top: 2px }
+    .status-badge {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; color: #34d399;
+      background: rgba(52,211,153,.10); border: 1px solid rgba(52,211,153,.2);
+      padding: 5px 12px; border-radius: 20px
+    }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #34d399; animation: pulse 2s infinite }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .hamburger { display: none; background: none; border: none; color: #94a3b8; cursor: pointer; padding: 4px }
+
+    /* ── Content ── */
+    .content { padding: 32px }
+
+    /* ── Search Box ── */
+    .search-card {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09);
+      border-radius: 20px; padding: 32px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.06);
+      margin-bottom: 36px
+    }
+    .fi {
+      width: 100%; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
+      border-radius: 12px; padding: 14px 16px 14px 44px; color: #f1f5f9;
+      font-size: 14px; outline: none; transition: .25s
+    }
+    .fi::placeholder { color: rgba(148,163,184,.6) }
+    .fi:focus { border-color: rgba(14,165,233,.6); background: rgba(14,165,233,.06); box-shadow: 0 0 0 3px rgba(14,165,233,.12) }
+    .iw { position: relative }
+    .ii { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: rgba(148,163,184,.6); pointer-events: none }
+
+    .btn-p {
+      padding: 14px 28px; border-radius: 12px; border: none; font-size: 15px; font-weight: 600;
+      cursor: pointer; background: linear-gradient(135deg,#0ea5e9 0%,#06b6d4 50%,#f97316 100%);
+      background-size: 200% 200%; color: #fff; transition: all .3s;
+      animation: gradShift 4s ease infinite; letter-spacing: .3px; white-space: nowrap
+    }
+    .btn-p:hover:not(:disabled) { box-shadow: 0 8px 30px rgba(14,165,233,.4); transform: translateY(-1px) }
+    .btn-p:disabled { opacity: .6; cursor: not-allowed; animation: none }
+    @keyframes gradShift { 0%{background-position:0 50%} 50%{background-position:100% 50%} 100%{background-position:0 50%} }
+
+    /* ── Spinner ── */
+    .spin {
+      display: inline-block; width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
+      border-radius: 50%; animation: sp .7s linear infinite; vertical-align: middle; margin-right: 8px
+    }
+    @keyframes sp { to{transform:rotate(360deg)} }
+
+    /* ── Train Cards ── */
+    .train-card {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 24px;
+      box-shadow: 0 4px 30px rgba(0,0,0,.3);
+      transition: transform .25s, box-shadow .25s, border-color .25s;
+      animation: fadeUp .4s ease both
+    }
+    .train-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.45);
+      border-color: rgba(14,165,233,.25)
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
+
+    .route-line {
+      display: flex; align-items: center; gap: 10px; margin: 12px 0;
+      font-size: 15px; font-weight: 600; color: #e2e8f0
+    }
+    .route-dot { width: 8px; height: 8px; border-radius: 50%; background: #0ea5e9; flex-shrink: 0 }
+    .route-bar { flex: 1; height: 2px; background: linear-gradient(90deg,#0ea5e9,#06b6d4,#f97316); border-radius: 2px; position: relative }
+    .route-bar::after { content:'🚆'; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:14px }
+
+    .time-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 8px
+    }
+    .time-dep { background: rgba(14,165,233,.12); border: 1px solid rgba(14,165,233,.2); color: #38bdf8 }
+    .time-arr { background: rgba(249,115,22,.12);  border: 1px solid rgba(249,115,22,.2);  color: #fb923c }
+
+    .seat-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 8px;
+      background: rgba(52,211,153,.10); border: 1px solid rgba(52,211,153,.2); color: #34d399
+    }
+    .seat-pill-low {
+      background: rgba(239,68,68,.10); border: 1px solid rgba(239,68,68,.2); color: #f87171
+    }
+
+    .view-btn {
+      padding: 10px 20px; border-radius: 10px; border: 1px solid rgba(14,165,233,.3);
+      background: rgba(14,165,233,.1); color: #38bdf8; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all .25s; white-space: nowrap
+    }
+    .view-btn:hover {
+      background: rgba(14,165,233,.2); border-color: rgba(14,165,233,.5);
+      box-shadow: 0 4px 16px rgba(14,165,233,.2); transform: translateY(-1px)
+    }
+
+    /* ── Error / Empty states ── */
+    .alert-box {
+      border-radius: 12px; padding: 14px 18px; font-size: 14px; font-weight: 500;
+      display: flex; align-items: flex-start; gap: 10px
+    }
+    .alert-err { background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.25); color: #fca5a5 }
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      background: rgba(255,255,255,.025); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px
+    }
+    .empty-icon { font-size: 52px; margin-bottom: 16px; display: block; opacity: .7 }
+
+    /* ── Skeleton ── */
+    .skeleton {
+      background: linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.06) 75%);
+      background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ── Mobile ── */
+    @media(max-width:768px) {
+      .sidebar { position:fixed; top:0; left:-260px; height:100%; z-index:50; transition:left .3s; width:260px }
+      .sidebar.open { left:0 }
+      .hamburger { display:block }
+      .content { padding:20px 16px }
+      .topbar { padding:16px 20px }
+      .search-row { flex-direction:column !important }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-layer"></div>
+  <div class="grid-ov"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logoi">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 10c0-4.5 3-7 8-7s8 2.5 8 7l-2 8H6l-2-8z"/>
+          <line x1="8" y1="19" x2="7" y2="22"/><line x1="16" y1="19" x2="17" y2="22"/>
+          <line x1="4" y1="14" x2="20" y2="14"/>
+        </svg>
+      </div>
+      <div class="logo-text"><h2>RailConnect</h2><p>Booking Platform</p></div>
+    </div>
+
+    <div class="nav-section-label">Navigation</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>Dashboard
+    </a>
+    <a href="search.html" class="nav-item active" id="nav-search">
+      <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.4-4.4"/>
+      </svg>Search Trains
+    </a>
+
+    <div class="sidebar-bottom">
+      <div class="user-chip">
+        <div class="avatar" id="sidebar-avatar">?</div>
+        <div class="user-info">
+          <div class="name" id="sidebar-name">Loading...</div>
+          <div class="email-text" id="sidebar-email">—</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()" id="logout-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Menu">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <div class="topbar-title">
+          <h2>Search Trains</h2>
+          <p>Find available routes across India</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="status-badge"><span class="status-dot"></span>API Connected</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Search Form -->
+      <div class="search-card">
+        <div class="mb-6">
+          <h3 class="text-xl font-bold text-white mb-1">Find Your Train</h3>
+          <p class="text-sm text-slate-400">Search by source and destination city</p>
+        </div>
+        <div class="search-row" style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap">
+          <!-- Source -->
+          <div style="flex:1;min-width:180px">
+            <label for="src-input" style="display:block;font-size:12px;font-weight:600;color:rgba(148,163,184,.7);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">From</label>
+            <div class="iw">
+              <span class="ii">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                </svg>
+              </span>
+              <input id="src-input" type="text" class="fi" placeholder="e.g. Mumbai" autocomplete="off" />
+            </div>
+          </div>
+
+          <!-- Swap -->
+          <button id="swap-btn" onclick="swapInputs()" style="flex-shrink:0;padding:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;cursor:pointer;transition:all .2s;color:#94a3b8;margin-bottom:0" title="Swap source and destination">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M7 16V4m0 0L3 8m4-4 4 4"/><path d="M17 8v12m0 0 4-4m-4 4-4-4"/>
+            </svg>
+          </button>
+
+          <!-- Destination -->
+          <div style="flex:1;min-width:180px">
+            <label for="dest-input" style="display:block;font-size:12px;font-weight:600;color:rgba(148,163,184,.7);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">To</label>
+            <div class="iw">
+              <span class="ii">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                </svg>
+              </span>
+              <input id="dest-input" type="text" class="fi" placeholder="e.g. Delhi" autocomplete="off" />
+            </div>
+          </div>
+
+          <!-- Search Button -->
+          <button id="search-btn" class="btn-p" onclick="searchTrains()" style="flex-shrink:0">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:8px"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.4-4.4"/></svg>
+            Search Trains
+          </button>
+        </div>
+
+        <!-- Error alert -->
+        <div id="search-error" class="alert-box alert-err mt-5 hidden">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="search-error-text"></span>
+        </div>
+      </div>
+
+      <!-- Results Area -->
+      <div id="results-area"></div>
+    </div>
+  </div>
+
+  <script src="search.js"></script>
+</body>
+</html>

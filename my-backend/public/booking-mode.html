@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RailConnect — Booking Mode</title>
+  <meta name="description" content="Choose booking mode for your train on RailConnect." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    * {
+      font-family: 'Inter', sans-serif;
+      box-sizing: border-box
+    }
+
+    body {
+      background: #020817;
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex
+    }
+
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse at 0% 0%, rgba(14, 165, 233, .10) 0%, transparent 55%),
+        radial-gradient(ellipse at 100% 100%, rgba(249, 115, 22, .08) 0%, transparent 55%),
+        #020817
+    }
+
+    .grid-ov {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: .025;
+      background-image: linear-gradient(rgba(255, 255, 255, .8) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .8) 1px, transparent 1px);
+      background-size: 40px 40px
+    }
+
+    .sidebar {
+      width: 260px;
+      min-height: 100vh;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+      background: rgba(255, 255, 255, .03);
+      backdrop-filter: blur(24px);
+      border-right: 1px solid rgba(255, 255, 255, .07);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      transition: width .3s
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 8px 28px;
+      border-bottom: 1px solid rgba(255, 255, 255, .06);
+      margin-bottom: 20px
+    }
+
+    .logoi {
+      background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(14, 165, 233, .3);
+      flex-shrink: 0
+    }
+
+    .logo-text h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2
+    }
+
+    .logo-text p {
+      font-size: 11px;
+      color: rgba(148, 163, 184, .6);
+      margin-top: 1px
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      color: rgba(148, 163, 184, .4);
+      text-transform: uppercase;
+      padding: 0 12px;
+      margin-bottom: 6px;
+      margin-top: 16px
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(148, 163, 184, .8);
+      cursor: pointer;
+      transition: all .2s;
+      border: 1px solid transparent;
+      text-decoration: none;
+      margin-bottom: 2px
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, .05);
+      color: #e2e8f0;
+      border-color: rgba(255, 255, 255, .06)
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(14, 165, 233, .18), rgba(6, 182, 212, .12));
+      color: #38bdf8;
+      border-color: rgba(14, 165, 233, .25);
+      box-shadow: 0 2px 16px rgba(14, 165, 233, .10)
+    }
+
+    .nav-item .icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      opacity: .8
+    }
+
+    .nav-item.active .icon {
+      opacity: 1
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, .06)
+    }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .07);
+      margin-bottom: 10px
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0ea5e9, #f97316);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0
+    }
+
+    .user-info .name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+      line-height: 1.3
+    }
+
+    .user-info .email-text {
+      font-size: 11px;
+      color: rgba(148, 163, 184, .6)
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 12px;
+      background: rgba(239, 68, 68, .08);
+      border: 1px solid rgba(239, 68, 68, .15);
+      color: #fca5a5;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, .15);
+      border-color: rgba(239, 68, 68, .25);
+      color: #f87171
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+      overflow-y: auto
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, .06);
+      background: rgba(2, 8, 23, .7);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 5
+    }
+
+    .topbar-title h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff
+    }
+
+    .topbar-title p {
+      font-size: 13px;
+      color: rgba(148, 163, 184, .7);
+      margin-top: 2px
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #34d399;
+      background: rgba(52, 211, 153, .10);
+      border: 1px solid rgba(52, 211, 153, .2);
+      padding: 5px 12px;
+      border-radius: 20px
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #34d399;
+      animation: pulse 2s infinite
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .4
+      }
+    }
+
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 4px
+    }
+
+    .content {
+      padding: 32px
+    }
+
+    .mode-card {
+      background: rgba(15, 23, 42, .96);
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, .3);
+      padding: 28px;
+      box-shadow: 0 12px 50px rgba(0, 0, 0, .6);
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .mode-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .pill-queue {
+      background: rgba(129, 140, 248, .15);
+      border: 1px solid rgba(129, 140, 248, .4);
+      color: #a5b4fc;
+    }
+
+    .pill-normal {
+      background: rgba(52, 211, 153, .15);
+      border: 1px solid rgba(52, 211, 153, .4);
+      color: #6ee7b7;
+    }
+
+    .pill-waiting {
+      background: rgba(251, 191, 36, .15);
+      border: 1px solid rgba(251, 191, 36, .4);
+      color: #fde68a;
+    }
+
+    .btn-p {
+      padding: 14px 24px;
+      border-radius: 12px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #f97316 100%);
+      background-size: 200% 200%;
+      color: #fff;
+      transition: all .3s;
+      animation: gradShift 4s ease infinite;
+      letter-spacing: .3px;
+      white-space: nowrap
+    }
+
+    .btn-p:hover:not(:disabled) {
+      box-shadow: 0 8px 30px rgba(14, 165, 233, .4);
+      transform: translateY(-1px)
+    }
+
+    .btn-p:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+      animation: none
+    }
+
+    @keyframes gradShift {
+      0% {
+        background-position: 0 50%
+      }
+
+      50% {
+        background-position: 100% 50%
+      }
+
+      100% {
+        background-position: 0 50%
+      }
+    }
+
+    .btn-ghost {
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, .5);
+      background: transparent;
+      color: #cbd5f5;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(148, 163, 184, .12);
+      border-color: rgba(148, 163, 184, .7);
+    }
+
+    .spin {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, .3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: sp .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px
+    }
+
+    @keyframes sp {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* ── Journey date & booking type ───────────────────────────────── */
+    .booking-inputs {
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 14px;
+      padding: 20px 22px;
+      margin-bottom: 20px;
+    }
+
+    .bi-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: rgba(148, 163, 184, .6);
+      margin-bottom: 8px;
+    }
+
+    .date-inp {
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .10);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 14px;
+      color: #f1f5f9;
+      outline: none;
+      width: 100%;
+      transition: border-color .2s, box-shadow .2s;
+      color-scheme: dark;
+      margin-bottom: 4px;
+    }
+
+    .date-inp:focus {
+      border-color: rgba(14, 165, 233, .5);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, .10);
+    }
+
+    .date-inp.err {
+      border-color: rgba(239, 68, 68, .5);
+    }
+
+    .date-hint {
+      font-size: 11px;
+      color: rgba(148, 163, 184, .45);
+      margin-bottom: 18px;
+    }
+
+    .type-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .type-opt {
+      position: relative;
+      padding: 14px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      border: 2px solid rgba(255, 255, 255, .08);
+      background: rgba(255, 255, 255, .03);
+      transition: all .2s;
+    }
+
+    .type-opt:hover {
+      border-color: rgba(14, 165, 233, .35);
+      background: rgba(14, 165, 233, .06);
+    }
+
+    .type-opt.selected {
+      border-color: #0ea5e9;
+      background: linear-gradient(135deg, rgba(14, 165, 233, .15), rgba(6, 182, 212, .08));
+    }
+
+    .type-opt input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .type-opt h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 2px;
+    }
+
+    .type-opt p {
+      font-size: 11px;
+      color: rgba(148, 163, 184, .55);
+      line-height: 1.4;
+    }
+
+    .bi-err {
+      font-size: 11px;
+      color: #f87171;
+      margin-top: 4px;
+      display: none;
+    }
+
+    @media(max-width:768px) {
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: -260px;
+        height: 100%;
+        z-index: 50;
+        transition: left .3s;
+        width: 260px
+      }
+
+      .sidebar.open {
+        left: 0
+      }
+
+      .hamburger {
+        display: block
+      }
+
+      .content {
+        padding: 20px 16px
+      }
+
+      .topbar {
+        padding: 16px 20px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-layer"></div>
+  <div class="grid-ov"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logoi">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 10c0-4.5 3-7 8-7s8 2.5 8 7l-2 8H6l-2-8z" />
+          <line x1="8" y1="19" x2="7" y2="22" />
+          <line x1="16" y1="19" x2="17" y2="22" />
+          <line x1="4" y1="14" x2="20" y2="14" />
+        </svg>
+      </div>
+      <div class="logo-text">
+        <h2>RailConnect</h2>
+        <p>Booking Platform</p>
+      </div>
+    </div>
+
+    <div class="nav-section-label">Navigation</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1" />
+        <rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <rect x="14" y="14" width="7" height="7" rx="1" />
+      </svg>Dashboard
+    </a>
+    <a href="search.html" class="nav-item active" id="nav-search">
+      <svg class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.4-4.4" />
+      </svg>Search Trains
+    </a>
+
+    <div class="sidebar-bottom">
+      <div class="user-chip">
+        <div class="avatar" id="sidebar-avatar">?</div>
+        <div class="user-info">
+          <div class="name" id="sidebar-name">Loading...</div>
+          <div class="email-text" id="sidebar-email">—</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()" id="logout-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"
+          aria-label="Menu">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+        <div class="topbar-title">
+          <h2>Booking Mode</h2>
+          <p id="topbar-subtitle">Preparing your seat selection flow</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="status-badge"><span class="status-dot"></span>API Connected</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="mode-card">
+        <div id="mode-pill" class="mode-pill pill-queue">
+          <span id="mode-pill-label">Queue Booking</span>
+        </div>
+        <h3 style="font-size:22px;font-weight:800;color:#e5e7eb;margin-top:16px;margin-bottom:4px;">
+          <span id="mode-title">Queue Booking Window</span>
+        </h3>
+        <p id="mode-description" style="font-size:14px;color:rgba(148,163,184,.8);margin-bottom:18px;">
+          Select up to 3 preferred seats before booking opens. Your choices will be saved in the queue.
+        </p>
+
+        <div style="font-size:13px;color:rgba(148,163,184,.8);margin-bottom:18px;">
+          <div id="launch-info" style="margin-bottom:6px;"></div>
+          <div id="countdown-info" style="color:#fbbf24;"></div>
+        </div>
+
+        <!-- ── Journey date + booking type ──────────────────────── -->
+        <div class="booking-inputs">
+
+          <!-- Date picker -->
+          <div class="bi-label">Journey Date</div>
+          <input type="date" id="journey-date" class="date-inp" aria-label="Journey date" aria-required="true" />
+          <div class="date-hint">🛈 Tickets can be booked up to 60 days in advance.</div>
+          <span class="bi-err" id="date-err">Please select a valid journey date.</span>
+
+          <!-- Booking type -->
+          <div class="bi-label" style="margin-top:4px;">Booking Type</div>
+          <div class="type-row">
+            <label class="type-opt selected" id="lbl-normal" for="radio-normal">
+              <input type="radio" id="radio-normal" name="btype" value="normal" checked />
+              <h4>🎫 Normal</h4>
+              <p>Standard booking &mdash; up to 6 passengers</p>
+            </label>
+            <label class="type-opt" id="lbl-tatkal" for="radio-tatkal">
+              <input type="radio" id="radio-tatkal" name="btype" value="tatkal" />
+              <h4>⚡ Tatkal</h4>
+              <p>Urgent premium booking &mdash; up to 4 passengers</p>
+            </label>
+          </div>
+
+        </div><!-- /.booking-inputs -->
+
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:0;">
+          <button id="continue-btn" class="btn-p">
+            <span id="continue-label">Continue to Queue Seat Selection</span>
+          </button>
+          <button type="button" class="btn-ghost" onclick="window.location.href='search.html'">
+            ← Back to search
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="booking-mode.js"></script>
+</body>
+
+</html>

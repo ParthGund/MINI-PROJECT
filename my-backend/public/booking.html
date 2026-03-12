@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RailConnect — Book Tickets</title>
+    <meta name="description"
+        content="Book train tickets on RailConnect. Select journey date, booking type, and enter passenger details." />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        /* ─── Reset ──────────────────────────────────────────────────────────── */
+        *,
+        *::before,
+        *::after {
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #020817;
+            color: #f1f5f9;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ─── Background ─────────────────────────────────────────────────────── */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse at 0% 0%, rgba(14, 165, 233, .10) 0%, transparent 55%),
+                radial-gradient(ellipse at 100% 100%, rgba(249, 115, 22, .08) 0%, transparent 55%),
+                #020817;
+        }
+
+        .grid-ov {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            opacity: .025;
+            background-image: linear-gradient(rgba(255, 255, 255, .8) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, .8) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* ─── Sidebar ────────────────────────────────────────────────────────── */
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, .03);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid rgba(255, 255, 255, .07);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 8px 28px;
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
+            margin-bottom: 20px;
+        }
+
+        .logoi {
+            background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(14, 165, 233, .3);
+            flex-shrink: 0;
+        }
+
+        .logo-text h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .logo-text p {
+            font-size: 11px;
+            color: rgba(148, 163, 184, .6);
+            margin-top: 1px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .08em;
+            color: rgba(148, 163, 184, .4);
+            text-transform: uppercase;
+            padding: 0 12px;
+            margin: 16px 0 6px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(148, 163, 184, .8);
+            text-decoration: none;
+            margin-bottom: 2px;
+            border: 1px solid transparent;
+            transition: all .2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, .05);
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, .06);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(14, 165, 233, .18), rgba(6, 182, 212, .12));
+            color: #38bdf8;
+            border-color: rgba(14, 165, 233, .25);
+            box-shadow: 0 2px 16px rgba(14, 165, 233, .10);
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            opacity: .8;
+        }
+
+        .nav-item.active svg {
+            opacity: 1;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, .06);
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .07);
+            margin-bottom: 10px;
+        }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0ea5e9, #f97316);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .u-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #e2e8f0;
+            line-height: 1.3;
+        }
+
+        .u-email {
+            font-size: 11px;
+            color: rgba(148, 163, 184, .6);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 11px 14px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, .08);
+            border: 1px solid rgba(239, 68, 68, .15);
+            color: #fca5a5;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, .15);
+            border-color: rgba(239, 68, 68, .25);
+            color: #f87171;
+        }
+
+        /* ─── Main ───────────────────────────────────────────────────────────── */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+            overflow-y: auto;
+        }
+
+        /* ─── Topbar ─────────────────────────────────────────────────────────── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
+            background: rgba(2, 8, 23, .7);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .topbar-title h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .topbar-title p {
+            font-size: 13px;
+            color: rgba(148, 163, 184, .7);
+            margin-top: 2px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #34d399;
+            background: rgba(52, 211, 153, .10);
+            border: 1px solid rgba(52, 211, 153, .2);
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #34d399;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .4
+            }
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* ─── Content ────────────────────────────────────────────────────────── */
+        .content {
+            padding: 32px;
+            max-width: 860px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* ─── Back button ────────────────────────────────────────────────────── */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(148, 163, 184, .8);
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, .08);
+            background: rgba(255, 255, 255, .04);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .2s;
+            margin-bottom: 28px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, .08);
+            color: #e2e8f0;
+        }
+
+        /* ─── Train info strip ───────────────────────────────────────────────── */
+        .train-strip {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            background: linear-gradient(135deg, rgba(14, 165, 233, .10), rgba(6, 182, 212, .05));
+            border: 1px solid rgba(14, 165, 233, .18);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 28px;
+        }
+
+        .train-strip .ts-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #f1f5f9;
+        }
+
+        .train-strip .ts-route {
+            font-size: 13px;
+            color: rgba(148, 163, 184, .65);
+            margin-top: 3px;
+        }
+
+        .ts-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .ts-dep {
+            background: rgba(14, 165, 233, .12);
+            border: 1px solid rgba(14, 165, 233, .2);
+            color: #38bdf8;
+        }
+
+        .ts-arr {
+            background: rgba(249, 115, 22, .12);
+            border: 1px solid rgba(249, 115, 22, .2);
+            color: #fb923c;
+        }
+
+        .ts-av {
+            background: rgba(52, 211, 153, .12);
+            border: 1px solid rgba(52, 211, 153, .2);
+            color: #34d399;
+        }
+
+        /* ─── Section card wrapper ───────────────────────────────────────────── */
+        .section-card {
+            background: rgba(15, 23, 42, .92);
+            border: 1px solid rgba(148, 163, 184, .10);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 28px rgba(0, 0, 0, .3);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .section-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(14, 165, 233, .3);
+        }
+
+        /* ─── Date picker ────────────────────────────────────────────────────── */
+        .date-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 320px;
+        }
+
+        .date-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(148, 163, 184, .75);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .date-input {
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 15px;
+            color: #f1f5f9;
+            outline: none;
+            width: 100%;
+            transition: border-color .2s, box-shadow .2s;
+            color-scheme: dark;
+        }
+
+        .date-input:focus {
+            border-color: rgba(14, 165, 233, .5);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, .10);
+        }
+
+        .date-input.err {
+            border-color: rgba(239, 68, 68, .5);
+        }
+
+        .date-hint {
+            font-size: 12px;
+            color: rgba(148, 163, 184, .5);
+            margin-top: 6px;
+        }
+
+        /* ─── Booking type cards ─────────────────────────────────────────────── */
+        .type-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 4px;
+        }
+
+        .type-card {
+            padding: 20px;
+            border-radius: 14px;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, .08);
+            background: rgba(255, 255, 255, .03);
+            transition: all .2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .type-card:hover {
+            border-color: rgba(14, 165, 233, .35);
+            background: rgba(14, 165, 233, .06);
+        }
+
+        .type-card.selected {
+            border-color: #0ea5e9;
+            background: linear-gradient(135deg, rgba(14, 165, 233, .15), rgba(6, 182, 212, .08));
+            box-shadow: 0 4px 20px rgba(14, 165, 233, .18);
+        }
+
+        .type-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .type-icon {
+            font-size: 22px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .08);
+        }
+
+        .type-card h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 4px;
+        }
+
+        .type-card p {
+            font-size: 12px;
+            color: rgba(148, 163, 184, .6);
+            line-height: 1.4;
+        }
+
+        .type-card .type-check {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, .15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s;
+        }
+
+        .type-card.selected .type-check {
+            background: #0ea5e9;
+            border-color: #0ea5e9;
+        }
+
+        .type-card.selected .type-check::after {
+            content: '';
+            display: block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #fff;
+        }
+
+        /* ─── Passenger count selector ───────────────────────────────────────── */
+        .count-desc {
+            font-size: 12px;
+            color: rgba(148, 163, 184, .5);
+            margin-bottom: 14px;
+        }
+
+        .count-btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .count-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(255, 255, 255, .05);
+            color: #94a3b8;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .count-btn:hover {
+            background: rgba(14, 165, 233, .15);
+            border-color: rgba(14, 165, 233, .4);
+            color: #38bdf8;
+            transform: translateY(-1px);
+        }
+
+        .count-btn.active {
+            background: linear-gradient(135deg, rgba(14, 165, 233, .28), rgba(6, 182, 212, .18));
+            border-color: rgba(14, 165, 233, .6);
+            color: #38bdf8;
+            box-shadow: 0 4px 16px rgba(14, 165, 233, .22);
+            transform: translateY(-2px);
+        }
+
+        /* ─── Passenger cards container ──────────────────────────────────────── */
+        #passengers-container {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        /* ─── Individual passenger card ──────────────────────────────────────── */
+        .pcard {
+            background: rgba(8, 18, 40, .97);
+            border: 1px solid rgba(148, 163, 184, .12);
+            border-radius: 18px;
+            padding: 26px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, .32);
+            animation: fadeUp .35s ease both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .pcard-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 18px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
+        }
+
+        .pcard-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 800;
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(14, 165, 233, .3);
+        }
+
+        .pcard-head h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .pcard-head p {
+            font-size: 11px;
+            color: rgba(148, 163, 184, .45);
+            margin-top: 1px;
+        }
+
+        /* personal info row */
+        .row-3 {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        /* prefs divider */
+        .pref-divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .pref-divider::before,
+        .pref-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, .06);
+        }
+
+        .pref-divider span {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: rgba(148, 163, 184, .45);
+            white-space: nowrap;
+        }
+
+        /* prefs row */
+        .row-3-prefs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        /* shared field group */
+        .fg {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .fl {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(148, 163, 184, .7);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .fi,
+        .fs {
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .09);
+            border-radius: 10px;
+            padding: 10px 13px;
+            font-size: 14px;
+            color: #f1f5f9;
+            outline: none;
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .fi::placeholder {
+            color: rgba(148, 163, 184, .3);
+        }
+
+        .fi:focus,
+        .fs:focus {
+            border-color: rgba(14, 165, 233, .5);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, .10);
+        }
+
+        .fi.err,
+        .fs.err {
+            border-color: rgba(239, 68, 68, .5);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, .08);
+        }
+
+        .ferr {
+            font-size: 11px;
+            color: #f87171;
+            margin-top: 2px;
+            display: none;
+        }
+
+        .ferr.on {
+            display: block;
+        }
+
+        /* ─── Alerts ─────────────────────────────────────────────────────────── */
+        .alert {
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .alert-err {
+            background: rgba(239, 68, 68, .12);
+            border: 1px solid rgba(239, 68, 68, .25);
+            color: #fca5a5;
+        }
+
+        /* ─── Enter Queue button ─────────────────────────────────────────────── */
+        .btn-queue {
+            width: 100%;
+            padding: 18px 28px;
+            border-radius: 14px;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: .3px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #f97316 100%);
+            background-size: 200% 200%;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all .3s;
+            animation: grad 4s ease infinite;
+        }
+
+        .btn-queue:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 36px rgba(14, 165, 233, .45);
+        }
+
+        .btn-queue:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            animation: none;
+        }
+
+        @keyframes grad {
+            0% {
+                background-position: 0 50%
+            }
+
+            50% {
+                background-position: 100% 50%
+            }
+
+            100% {
+                background-position: 0 50%
+            }
+        }
+
+        /* ─── Spinner ────────────────────────────────────────────────────────── */
+        .spin {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            border: 2px solid rgba(255, 255, 255, .3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: sp .7s linear infinite;
+        }
+
+        @keyframes sp {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        /* ─── Success modal ──────────────────────────────────────────────────── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(2, 8, 23, .88);
+            backdrop-filter: blur(14px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-box {
+            background: rgba(12, 22, 44, .97);
+            border: 1px solid rgba(52, 211, 153, .22);
+            border-radius: 24px;
+            padding: 48px 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, .7), 0 0 40px rgba(52, 211, 153, .08);
+            transform: scale(.9);
+            transition: transform .35s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        .modal-overlay.show .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, rgba(52, 211, 153, .2), rgba(16, 185, 129, .08));
+            border: 2px solid rgba(52, 211, 153, .4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-box h3 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .modal-box p {
+            font-size: 14px;
+            color: rgba(148, 163, 184, .8);
+            line-height: 1.65;
+            margin-bottom: 28px;
+        }
+
+        .modal-summary {
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(255, 255, 255, .07);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .modal-summary .ms-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: rgba(148, 163, 184, .4);
+            margin-bottom: 10px;
+        }
+
+        .modal-summary .ms-row {
+            font-size: 13px;
+            color: rgba(148, 163, 184, .8);
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+
+        .modal-summary .ms-row strong {
+            color: #f1f5f9;
+        }
+
+        .btn-done {
+            padding: 13px 36px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            border: 1px solid rgba(52, 211, 153, .3);
+            background: rgba(52, 211, 153, .10);
+            color: #34d399;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .btn-done:hover {
+            background: rgba(52, 211, 153, .2);
+            border-color: rgba(52, 211, 153, .5);
+        }
+
+        /* ─── Responsive ─────────────────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -260px;
+                height: 100%;
+                z-index: 50;
+                transition: left .3s;
+                width: 260px;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .content {
+                padding: 20px 16px;
+            }
+
+            .topbar {
+                padding: 16px 20px;
+            }
+
+            .type-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 580px) {
+            .row-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .row-3-prefs {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-layer"></div>
+    <div class="grid-ov"></div>
+
+    <!-- ─── Sidebar ─────────────────────────────────────────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="logoi">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 10c0-4.5 3-7 8-7s8 2.5 8 7l-2 8H6l-2-8z" />
+                    <line x1="8" y1="19" x2="7" y2="22" />
+                    <line x1="16" y1="19" x2="17" y2="22" />
+                    <line x1="4" y1="14" x2="20" y2="14" />
+                </svg>
+            </div>
+            <div class="logo-text">
+                <h2>RailConnect</h2>
+                <p>Booking Platform</p>
+            </div>
+        </div>
+
+        <div class="nav-label">Navigation</div>
+        <a href="dashboard.html" class="nav-item">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>Dashboard
+        </a>
+        <a href="search.html" class="nav-item active">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.4-4.4" />
+            </svg>Search Trains
+        </a>
+
+        <div class="sidebar-bottom">
+            <div class="user-chip">
+                <div class="avatar" id="sidebar-avatar">?</div>
+                <div>
+                    <div class="u-name" id="sidebar-name">Loading…</div>
+                    <div class="u-email" id="sidebar-email">—</div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>Sign Out
+            </button>
+        </div>
+    </aside>
+
+    <!-- ─── Main ────────────────────────────────────────────────────────────── -->
+    <div class="main">
+        <header class="topbar">
+            <div style="display:flex;align-items:center;gap:12px">
+                <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')"
+                    aria-label="Menu">
+                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <line x1="3" y1="12" x2="21" y2="12" />
+                        <line x1="3" y1="18" x2="21" y2="18" />
+                    </svg>
+                </button>
+                <div class="topbar-title">
+                    <h2>Book Tickets</h2>
+                    <p>Select journey date, booking type, and enter passenger details</p>
+                </div>
+            </div>
+            <div class="status-badge"><span class="status-dot"></span>API Connected</div>
+        </header>
+
+        <div class="content">
+
+            <!-- Back to Search -->
+            <a href="search.html" class="back-btn">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path d="M19 12H5" />
+                    <path d="m12 19-7-7 7-7" />
+                </svg>Back to Search
+            </a>
+
+            <!-- ① Train info strip (populated by JS) -->
+            <div class="train-strip" id="train-strip">
+                <div style="flex:1">
+                    <div class="ts-name" id="ts-name">Loading train…</div>
+                    <div class="ts-route" id="ts-route">—</div>
+                </div>
+                <div id="ts-badges" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+            </div>
+
+            <!-- ② Journey Date + Booking Type ───────────────────────────────── -->
+            <div class="section-card">
+                <div class="section-title"><span class="section-num">1</span>Journey Details</div>
+
+                <!-- Date picker -->
+                <div class="date-wrap" style="margin-bottom:24px">
+                    <label class="date-label" for="journey-date">Journey Date</label>
+                    <input type="date" id="journey-date" class="date-input" aria-required="true" />
+                    <span class="date-hint">🛈 Tickets can be booked up to 60 days in advance.</span>
+                    <span class="ferr" id="date-err">Please select a valid journey date.</span>
+                </div>
+
+                <!-- Booking type -->
+                <div class="date-label" style="margin-bottom:12px">Booking Type</div>
+                <div class="type-grid">
+                    <label class="type-card selected" id="type-normal" for="radio-normal">
+                        <input type="radio" id="radio-normal" name="booking-type" value="normal" checked />
+                        <div class="type-check"></div>
+                        <div class="type-icon">🎫</div>
+                        <h4>Normal Booking</h4>
+                        <p>Standard booking — up to 6 passengers. Book anytime within the 60-day window.</p>
+                    </label>
+                    <label class="type-card" id="type-tatkal" for="radio-tatkal">
+                        <input type="radio" id="radio-tatkal" name="booking-type" value="tatkal" />
+                        <div class="type-check"></div>
+                        <div class="type-icon">⚡</div>
+                        <h4>Tatkal Booking</h4>
+                        <p>Urgent booking at a premium — up to 4 passengers. Subject to availability.</p>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ③ Passenger Count ─────────────────────────────────────────────── -->
+            <div class="section-card">
+                <div class="section-title"><span class="section-num">2</span>How many passengers are travelling?</div>
+                <p class="count-desc" id="count-desc">Normal booking: select 1 to 6 passengers.</p>
+                <div class="count-btns" id="count-btns" role="group" aria-label="Number of passengers">
+                    <!-- rendered by JS -->
+                </div>
+            </div>
+
+            <!-- ④ Passenger Details ──────────────────────────────────────────── -->
+            <div class="section-card">
+                <div class="section-title"><span class="section-num">3</span>Passenger Details &amp; Seat Preferences
+                </div>
+                <div id="passengers-container">
+                    <!-- passenger cards injected by JS -->
+                </div>
+            </div>
+
+            <!-- Global error -->
+            <div id="global-error"></div>
+
+            <!-- ⑤ Enter Queue button ─────────────────────────────────────────── -->
+            <button class="btn-queue" id="queue-btn" onclick="enterBookingQueue()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                Enter Booking Queue
+            </button>
+
+        </div><!-- /.content -->
+    </div><!-- /.main -->
+
+    <!-- ─── Success Modal ────────────────────────────────────────────────────── -->
+    <div class="modal-overlay" id="success-modal" role="dialog" aria-modal="true" aria-labelledby="modal-h">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <svg width="36" height="36" fill="none" stroke="#34d399" stroke-width="2.5" viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12" />
+                </svg>
+            </div>
+            <h3 id="modal-h">You're in the Queue!</h3>
+            <p>You have successfully joined the booking queue.<br>Your booking will be processed shortly.</p>
+            <div class="modal-summary" id="modal-summary"><!-- filled by JS --></div>
+            <button class="btn-done" onclick="closeModal()">Done</button>
+        </div>
+    </div>
+
+    <script src="booking.js"></script>
+</body>
+
+</html>
