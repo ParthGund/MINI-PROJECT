@@ -815,37 +815,61 @@
             <div id="section-bookings" class="fade-in hidden">
                 <div class="card mb-6">
                     <div class="section-title">My Bookings</div>
-                    <div class="section-sub">All your train reservations in one place</div>
-                    <div class="activity-item">
-                        <div class="act-icon" style="background:rgba(14,165,233,.12)">🚆</div>
-                        <div class="act-info">
-                            <div class="act-title">Mumbai → Delhi — Rajdhani Express</div>
-                            <div class="act-sub">Seat 24B · Sleeper · Dep. 06:00 AM · Jan 28, 2026</div>
-                        </div>
-                        <div class="act-badge badge-green">Confirmed</div>
+                    <div class="section-sub">Your confirmed train reservations</div>
+
+                    <!-- Loading skeleton -->
+                    <div id="booking-loading" class="space-y-3">
+                        <div class="skeleton" style="height:20px;width:60%;margin-bottom:8px"></div>
+                        <div class="skeleton" style="height:16px;width:80%"></div>
+                        <div class="skeleton" style="height:16px;width:50%"></div>
                     </div>
-                    <div class="activity-item">
-                        <div class="act-icon" style="background:rgba(249,115,22,.12)">🎟️</div>
-                        <div class="act-info">
-                            <div class="act-title">Delhi → Jaipur — Shatabdi Express</div>
-                            <div class="act-sub">WL/3 · AC Chair Car · Dep. 10:15 AM · Feb 5, 2026</div>
-                        </div>
-                        <div class="act-badge badge-orange">Waitlisted</div>
+
+                    <!-- No booking state -->
+                    <div id="booking-empty" class="hidden text-center py-10">
+                        <div style="font-size:48px;margin-bottom:12px">🎫</div>
+                        <div style="font-size:16px;font-weight:600;color:#e2e8f0;margin-bottom:6px">No Bookings Found</div>
+                        <div style="font-size:13px;color:rgba(148,163,184,.6);margin-bottom:20px">You haven't made any bookings yet.</div>
+                        <a href="search.html" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;
+                            background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:#fff;font-size:14px;font-weight:600;text-decoration:none">
+                            Search Trains
+                        </a>
                     </div>
-                    <div class="activity-item">
-                        <div class="act-icon" style="background:rgba(139,92,246,.12)">🚄</div>
-                        <div class="act-info">
-                            <div class="act-title">Kolkata → Chennai — Coromandel Express</div>
-                            <div class="act-sub">Seat 10C · 3AC · Dep. 08:30 PM · Mar 1, 2026</div>
+
+                    <!-- Real ticket card -->
+                    <div id="booking-ticket" class="hidden activity-item" style="flex-direction:column;align-items:flex-start;gap:0;padding:0">
+                        <div style="display:flex;align-items:center;gap:14px;padding:14px 0;width:100%;border-bottom:1px solid rgba(255,255,255,.05)">
+                            <div class="act-icon" style="background:rgba(14,165,233,.12);flex-shrink:0">🚆</div>
+                            <div class="act-info" style="flex:1">
+                                <div class="act-title" id="ticket-train">—</div>
+                                <div class="act-sub">
+                                    <span>Seat </span><span id="ticket-seat" style="font-weight:600;color:#38bdf8">—</span>
+                                    &nbsp;·&nbsp;
+                                    <span id="ticket-type">—</span>
+                                    &nbsp;·&nbsp;
+                                    <span id="ticket-date">—</span>
+                                </div>
+                            </div>
+                            <div class="act-badge badge-green">Confirmed</div>
                         </div>
-                        <div class="act-badge badge-blue">Upcoming</div>
+                        <div style="padding:16px 0 4px;width:100%">
+                            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+                                <div>
+                                    <div class="pf-label">Passenger Name</div>
+                                    <div class="pf-value" id="ticket-name">—</div>
+                                </div>
+                                <div>
+                                    <div class="pf-label">Age</div>
+                                    <div class="pf-value" id="ticket-age">—</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="card" style="background:rgba(14,165,233,.05);border-color:rgba(14,165,233,.15)">
-                    <p class="text-sm text-slate-400">Connect your backend booking API to display real reservation data
-                        here.</p>
+                    <p class="text-sm text-slate-400">Booking data is fetched live from the backend — each account sees only their own ticket.</p>
                 </div>
             </div>
+
 
             <!-- PNR SECTION -->
             <div id="section-pnr" class="fade-in hidden">

@@ -142,7 +142,7 @@ function showConfirmationCard(preferredSeats, message) {
 }
 
 async function confirmBooking() {
-  if (!assignedSeat) return;
+  if (!assignedSeat) return;  
   
   try {
     const passengerData = JSON.parse(localStorage.getItem('tempPassengerDetails')) || {};
@@ -155,7 +155,9 @@ async function confirmBooking() {
       body: JSON.stringify({
         userId: currentUser.id,
         assignedSeat: assignedSeat,
-        passengerData
+        passengerData,
+        trainId: trainId || 'TRN001',
+        journeyDate: journeyDate || passengerData.date || new Date().toISOString()
       })
     });
     

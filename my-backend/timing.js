@@ -4,16 +4,17 @@
 // All timing logic (booking phases, departure date) derives from this value.
 //
 // Booking phases (relative to server start):
-//   0 – 2 min  →  'waiting'  — Booking not yet open
-//   2 – 4 min  →  'queue'    — Queue booking OPEN
-//   4 – 6 min  →  'normal'   — Normal booking OPEN
-//   6 min+     →  'tatkal'   — Tatkal booking OPEN
+//   0 – 30 sec      →  'waiting'  — Booking not yet open
+//   30 sec – 2m30s  →  'queue'    — Queue booking OPEN  (2 min window)
+//   2m30s – 4m30s   →  'normal'   — Normal booking OPEN (2 min window)
+//   4m30s+          →  'tatkal'   — Tatkal booking OPEN (indefinite)
 
 const projectStart = Date.now();
 
-const TWO_MIN_MS  = 2 * 60 * 1000;
-const FOUR_MIN_MS = 4 * 60 * 1000;
-const SIX_MIN_MS  = 6 * 60 * 1000;
+// Phase boundary timestamps (ms from server start)
+const WAITING_END_MS = 30_000;        //  30 seconds
+const QUEUE_END_MS   = 150_000;       //  2 min 30 sec  (30s + 120s)
+const NORMAL_END_MS  = 270_000;       //  4 min 30 sec  (150s + 120s)
 
 function getBookingStatus(nowMs = Date.now()) {
   const elapsed = nowMs - projectStart;
@@ -21,15 +22,15 @@ function getBookingStatus(nowMs = Date.now()) {
   let phase = 'tatkal';
   let timeRemaining = 0;
 
-  if (elapsed < TWO_MIN_MS) {
+  if (elapsed < WAITING_END_MS) {
     phase = 'waiting';
-    timeRemaining = Math.ceil((TWO_MIN_MS - elapsed) / 1000);
-  } else if (elapsed < FOUR_MIN_MS) {
+    timeRemaining = Math.ceil((WAITING_END_MS - elapsed) / 1000);
+  } else if (elapsed < QUEUE_END_MS) {
     phase = 'queue';
-    timeRemaining = Math.ceil((FOUR_MIN_MS - elapsed) / 1000);
-  } else if (elapsed < SIX_MIN_MS) {
+    timeRemaining = Math.ceil((QUEUE_END_MS - elapsed) / 1000);
+  } else if (elapsed < NORMAL_END_MS) {
     phase = 'normal';
-    timeRemaining = Math.ceil((SIX_MIN_MS - elapsed) / 1000);
+    timeRemaining = Math.ceil((NORMAL_END_MS - elapsed) / 1000);
   } else {
     phase = 'tatkal';
     timeRemaining = 0;

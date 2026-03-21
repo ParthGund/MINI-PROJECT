@@ -241,6 +241,49 @@ function logout() {
     window.location.href = 'index.html';
 }
 
+// ─── Load real ticket from backend ────────────────────────────────────────────
+async function loadUserTicket() {
+    const user = getCachedUser();
+    if (!user || !user.id) return;
+
+    const loading = document.getElementById('booking-loading');
+    const empty   = document.getElementById('booking-empty');
+    const ticket  = document.getElementById('booking-ticket');
+
+    // Reset: show skeleton
+    if (loading) loading.classList.remove('hidden');
+    if (empty)   empty.classList.add('hidden');
+    if (ticket)  ticket.classList.add('hidden');
+
+    try {
+        const res  = await fetch(`/api/ticket/${user.id}`);
+        const data = await res.json();
+
+        if (loading) loading.classList.add('hidden');
+
+        if (!data.ticket) {
+            if (empty) empty.classList.remove('hidden');
+            return;
+        }
+
+        const t = data.ticket;
+        document.getElementById('ticket-name').textContent  = t.passengerName || '—';
+        document.getElementById('ticket-age').textContent   = t.age           || '—';
+        document.getElementById('ticket-train').textContent = `Train ${t.train}`;
+        document.getElementById('ticket-date').textContent  = t.journeyDate
+            ? new Date(t.journeyDate).toLocaleDateString()
+            : '—';
+        document.getElementById('ticket-seat').textContent  = t.seatNumber    || '—';
+        document.getElementById('ticket-type').textContent  = t.seatType      || 'Confirmed';
+
+        if (ticket) ticket.classList.remove('hidden');
+    } catch (err) {
+        console.error('[Ticket] fetch error:', err);
+        if (loading) loading.classList.add('hidden');
+        if (empty)   empty.classList.remove('hidden');
+    }
+}
+
 // ─── Dashboard section navigation ─────────────────────────────────────────────
 function showSection(name, clickedNav) {
     const sections = ['dashboard', 'bookings', 'pnr', 'profile'];
@@ -270,6 +313,11 @@ function showSection(name, clickedNav) {
             const topbarSub = document.getElementById('topbar-subtitle');
             if (topbarSub) topbarSub.innerHTML = `Welcome back, <span id="topbar-name" class="text-sky-400 font-semibold">${cached.name || '—'}</span>`;
         }
+    }
+
+    // Fetch live ticket whenever bookings section is opened
+    if (name === 'bookings') {
+        loadUserTicket();
     }
 
     // Close mobile sidebar

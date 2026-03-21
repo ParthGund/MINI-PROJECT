@@ -7,10 +7,10 @@
  * which derives the phase entirely from server start time (timing.js).
  *
  * Booking phases (relative to server start):
- *   waiting (0–2 min) : Booking not open yet — button disabled
- *   queue   (2–4 min) : Queue booking OPEN — "Enter Queue"
- *   normal  (4–6 min) : Normal booking OPEN — "Book Seats", Tatkal locked
- *   tatkal  (6 min+)  : Tatkal OPEN — Normal booking closed
+ *   waiting (0–30 sec)      : Booking not open yet — button disabled
+ *   queue   (30s–2m30s)     : Queue booking OPEN — "Enter Queue"
+ *   normal  (2m30s–4m30s)   : Normal booking OPEN — "Book Seats", Tatkal locked
+ *   tatkal  (4m30s+)        : Tatkal OPEN — Normal booking closed
  *
  * No localStorage timestamps. No hardcoded clock times. Pure server-side truth.
  *
@@ -170,20 +170,20 @@ async function fetchBookingStatus() {
 
 // ── UI helpers ────────────────────────────────────────────────────────────────
 
-/** Apply waiting-phase UI (0–2 min): booking not open yet */
+/** Apply waiting-phase UI (0–30 sec): booking not open yet */
 function renderWaiting(timeRemaining) {
   setTopSubtitle('Booking window not open yet — please wait…');
   setPill('pill-waiting', 'Waiting');
   setModeTitle('⏳ Booking Not Open Yet');
-  setModeDesc('The booking window will open in queue mode shortly after the server starts. Please wait.');
-  setLaunchInfo(`Booking opens in ${formatSeconds(timeRemaining)} (queue mode starts first)`);
+  setModeDesc('The booking window will open in 30 seconds. Queue booking starts first.');
+  setLaunchInfo(`Queue booking opens in ${formatSeconds(timeRemaining)}`);
   setContinueBtnDisabled(true, 'Please wait…');
   setCountdown(timeRemaining, () =>
     setContinueBtnDisabled(true, '⏳ Still waiting for queue window…')
   );
 }
 
-/** Apply queue-phase UI (2–4 min): queue booking open */
+/** Apply queue-phase UI (30s–2m30s): queue booking open */
 function renderQueue(timeRemaining, trainId) {
   setTopSubtitle('You are in Queue Booking mode');
   setPill('pill-queue', 'Queue Booking');
@@ -207,17 +207,17 @@ function renderQueue(timeRemaining, trainId) {
   };
 }
 
-/** Apply normal-phase UI (4–6 min): normal booking open, tatkal locked */
+/** Apply normal-phase UI (2m30s–4m30s): normal booking open, tatkal locked */
 function renderNormal(timeRemaining, trainId) {
-  setTopSubtitle('Normal booking is open — Tatkal opens after 6 minutes');
+  setTopSubtitle('Normal booking is open — Tatkal opens after 4 min 30 sec');
   setPill('pill-normal', 'Normal Booking');
   setModeTitle('Normal Booking Window');
-  setModeDesc('Normal booking is currently open. Tatkal booking will become available after 6 minutes from server start.');
+  setModeDesc('Normal booking is currently open. Tatkal booking will become available 4 minutes 30 seconds from server start.');
   setLaunchInfo(`Tatkal window opens in ${formatSeconds(timeRemaining)}`);
   setContinueBtnDisabled(false, 'Continue to Book Seats');
 
   // Lock Tatkal option with a hint
-  lockTatkal('Tatkal booking opens after 6 minutes.');
+  lockTatkal('Tatkal booking opens after 4 min 30 sec.');
 
   // Live countdown until tatkal opens
   setCountdownLive(timeRemaining, 'Tatkal opens in');

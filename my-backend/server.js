@@ -17,6 +17,9 @@ let queueCounter   = 0;   // ever-incrementing; gives each entry a stable positi
 // ── Seat locking and booking system ───────────────────────────────────────────────
 let bookedSeats = [];
 
+// ── Per-user ticket storage (in-memory) ───────────────────────────────────────
+let userTickets = {}; // { userId: { passengerName, age, train, journeyDate, seatNumber, seatType } }
+
 // ── CORS (only needed if you ever call the API from a different origin) ──
 app.use(cors({
   origin: '*',                           // tighten this in production
@@ -165,6 +168,16 @@ app.post('/api/booking/confirm', (req, res) => {
     bookedSeats.push(assignedSeat); // fallback
   }
   
+  // ── Save ticket for this user ───────────────────────────────────────────────
+  userTickets[userId] = {
+    passengerName : passengerData?.name || 'Unknown',
+    age           : passengerData?.age  || 'N/A',
+    train         : req.body.trainId    || 'TRN001',
+    journeyDate   : req.body.journeyDate || new Date().toISOString(),
+    seatNumber    : assignedSeat ? String(assignedSeat).replace('seat_', '') : 'N/A',
+    seatType      : 'Confirmed',
+  };
+  
   // QUEUE SAFETY CHECK: After booking confirmation: queue.shift()
   if (bookingQueue.length > 0 && String(bookingQueue[0].data.userId) === String(userId)) {
     bookingQueue.shift();
@@ -201,6 +214,15 @@ app.post('/api/booking/cancel', (req, res) => {
   
   console.log(`[Booking] User ${userId} cancelled booking. Advanced queue.`);
   res.json({ message: 'Booking cancelled successfully' });
+});
+
+// ── Fetch ticket for a specific user ──────────────────────────────────────────
+app.get('/api/ticket/:userId', (req, res) => {
+  const userId = req.params.userId;
+  if (!userTickets[userId]) {
+    return res.json({ ticket: null });
+  }
+  res.json({ ticket: userTickets[userId] });
 });
 
 // ── Fallback: serve index.html for any non-API route ──
