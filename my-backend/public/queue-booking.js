@@ -142,49 +142,107 @@ function showConfirmationCard(preferredSeats, message) {
 }
 
 async function confirmBooking() {
-  if (!assignedSeat) return;  
-  
+  if (!assignedSeat) return;
+
   try {
     const passengerData = JSON.parse(localStorage.getItem('tempPassengerDetails')) || {};
-    passengerData.name = currentUser.name;
+    passengerData.name  = currentUser.name;
     passengerData.email = currentUser.email;
-    
+
     const response = await fetch('/api/booking/confirm', {
-      method: 'POST',
+      method : 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: currentUser.id,
-        assignedSeat: assignedSeat,
+      body   : JSON.stringify({
+        userId      : currentUser.id,
+        assignedSeat: assignedSeat,   // kept for backward compat
+        seatType    : assignedSeat,   // new clean field
         passengerData,
-        trainId: trainId || 'TRN001',
-        journeyDate: journeyDate || passengerData.date || new Date().toISOString()
-      })
+        trainId     : trainId     || 'TRN001',
+        journeyDate : journeyDate || passengerData.date || new Date().toISOString(),
+      }),
     });
-    
+
     if (!response.ok) throw new Error('Failed to confirm booking');
-    
+
+    const data = await response.json();
+    const ticket = data.ticket || {};
+
     localStorage.removeItem('queueUserId');
-    
-    // Show Ticket Summary
+
+    // Hide booking UI and queue status bar
     document.getElementById('confirmation-card').classList.add('hidden');
-    document.getElementById('ticket-summary').classList.remove('hidden');
-    
-    document.getElementById('ticket-name').textContent = currentUser.name || 'User';
-    document.getElementById('ticket-age').textContent = passengerData.age || 'Adult';
-    document.getElementById('ticket-train').textContent = `Train ${trainId}`;
-    let dateStr = journeyDate;
-    if (journeyDate) {
-      dateStr = new Date(journeyDate).toLocaleDateString();
-    } else if (passengerData && passengerData.date) {
-      dateStr = new Date(passengerData.date).toLocaleDateString();
+    document.getElementById('queue-status').classList.add('hidden');
+
+    // Show the premium ticket modal
+    const modal = document.getElementById('ticket-summary');
+    modal.classList.remove('hidden');
+
+    // Populate all fields from the backend-returned ticket
+    document.getElementById('ticket-name').textContent =
+      ticket.passengerName || currentUser.name || 'N/A';
+
+    document.getElementById('ticket-age').textContent =
+      ticket.age || passengerData.age || 'N/A';
+
+    document.getElementById('ticket-train').textContent =
+      `Train ${ticket.trainId || trainId || 'TRN001'}`;
+
+    let dateStr = ticket.journeyDate || journeyDate;
+    if (dateStr) {
+      try { dateStr = new Date(dateStr).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); }
+      catch { /* keep raw */ }
     }
     document.getElementById('ticket-date').textContent = dateStr || 'N/A';
-    document.getElementById('ticket-seat').textContent = assignedSeat.replace('seat_','');
-    
+
+    // Seat number (auto-generated integer from backend)
+    document.getElementById('ticket-seat').textContent = ticket.seatNumber || '—';
+
+    // Seat type badge with colour
+    const seatTypeEl = document.getElementById('ticket-seattype');
+    const st = ticket.seatType || assignedSeat || 'General';
+    seatTypeEl.textContent = st;
+    // Colour-code by type
+    const colourMap = { lower: '#fb923c', middle: '#a78bfa', upper: '#38bdf8' };
+    const colKey = st.toLowerCase();
+    if (colourMap[colKey]) {
+      seatTypeEl.style.color       = colourMap[colKey];
+      seatTypeEl.style.background  = `${colourMap[colKey]}22`;
+      seatTypeEl.style.borderColor = `${colourMap[colKey]}55`;
+    }
+
+    // Scroll to ticket
+    modal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
   } catch (error) {
     console.error('Error:', error);
     alert('Error confirming booking');
   }
+}
+
+function handleDownload() {
+  // UI-only stub — implementation can use html2canvas or window.print()
+  const name  = document.getElementById('ticket-name').textContent;
+  const train = document.getElementById('ticket-train').textContent;
+  const seat  = document.getElementById('ticket-seat').textContent;
+  const type  = document.getElementById('ticket-seattype').textContent;
+  const date  = document.getElementById('ticket-date').textContent;
+  const text  = [
+    '===== RailConnect — e-Ticket =====',
+    `Passenger : ${name}`,
+    `Train     : ${train}`,
+    `Date      : ${date}`,
+    `Seat No.  : ${seat}`,
+    `Seat Type : ${type}`,
+    `Status    : Confirmed`,
+    '==================================',
+  ].join('\n');
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'railconnect-ticket.txt';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 async function cancelBooking() {

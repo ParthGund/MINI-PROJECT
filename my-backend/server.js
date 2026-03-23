@@ -14,11 +14,17 @@ const trainRoutes = require('./routes/trainRoutes');
 const bookingQueue = [];   // stores entries in FIFO order
 let queueCounter   = 0;   // ever-incrementing; gives each entry a stable position #
 
-// ── Seat locking and booking system ───────────────────────────────────────────────
-let bookedSeats = [];
+// ── Seat type locking (demo: one booking per type) ──────────────────────────
+// Allowed types in order of preference fallback
+const SEAT_TYPES = ['Lower', 'Middle', 'Upper'];
+let bookedSeatTypes = []; // tracks which seat types have been booked
+
+// ── Auto-incrementing seat number generator ──────────────────────────────────
+let seatNumberCounter = 11; // starts at 12 on first use
+function getNextSeatNumber() { return ++seatNumberCounter; }
 
 // ── Per-user ticket storage (in-memory) ───────────────────────────────────────
-let userTickets = {}; // { userId: { passengerName, age, train, journeyDate, seatNumber, seatType } }
+let userTickets = {}; // { userId: { passengerName, age, trainId, journeyDate, seatNumber, seatType, status } }
 
 // ── CORS (only needed if you ever call the API from a different origin) ──
 app.use(cors({
@@ -108,96 +114,120 @@ app.get('/api/queue-status/:userId', (req, res) => {
 
 /**
  * POST /api/queue/enter-booking
+ * Assigns a seat TYPE (Lower / Middle / Upper) based on preference.
+ * Only ONE booking per seat type is allowed (demo constraint).
  */
 app.post('/api/queue/enter-booking', (req, res) => {
   const { userId, preferredSeats } = req.body;
   if (!userId) return res.status(400).json({ error: 'userId is required' });
-  
+
   const userIndex = bookingQueue.findIndex(e => String(e.data.userId) === String(userId));
-  
+
   if (userIndex !== 0) {
-    return res.status(403).json({ 
+    return res.status(403).json({
       error: 'You are not at the front of the queue',
       position: userIndex + 1
     });
   }
 
-  let assignedSeat = null;
-  let message = "";
+  let assignedSeatType = null;
+  let message = '';
 
   if (preferredSeats && preferredSeats.length > 0) {
-    const seat1 = String(preferredSeats[0]).startsWith('seat_') ? String(preferredSeats[0]) : `seat_${preferredSeats[0]}`;
-    const seat2 = preferredSeats.length > 1 ? (String(preferredSeats[1]).startsWith('seat_') ? String(preferredSeats[1]) : `seat_${preferredSeats[1]}`) : null;
-    
-    if (!bookedSeats.includes(seat1)) {
-      assignedSeat = seat1;
-      message = "First preference available and booked.";
-    } else if (seat2) {
-      assignedSeat = seat2;
-      message = "First preference already booked, second preference allotted.";
+    // Normalise: strip 'seat_' prefix, capitalise first letter
+    const normalise = (s) => {
+      const raw = String(s).replace(/^seat_/i, '');
+      return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
+    };
+
+    const pref1 = normalise(preferredSeats[0]);
+    const pref2 = preferredSeats.length > 1 ? normalise(preferredSeats[1]) : null;
+
+    if (!bookedSeatTypes.includes(pref1)) {
+      assignedSeatType = pref1;
+      message = `First preference (${pref1}) available and assigned.`;
+    } else if (pref2 && !bookedSeatTypes.includes(pref2)) {
+      assignedSeatType = pref2;
+      message = `${pref1} already booked — second preference (${pref2}) assigned.`;
     } else {
-      message = "No preferences available.";
+      // Fallback: find first available type
+      const fallback = SEAT_TYPES.find(t => !bookedSeatTypes.includes(t));
+      if (fallback) {
+        assignedSeatType = fallback;
+        message = `Both preferences taken — assigned available type: ${fallback}.`;
+      } else {
+        message = 'All seat types are fully booked.';
+      }
     }
-    
-    if (assignedSeat && !bookedSeats.includes(assignedSeat)) {
-      bookedSeats.push(assignedSeat);
+
+    if (assignedSeatType && !bookedSeatTypes.includes(assignedSeatType)) {
+      bookedSeatTypes.push(assignedSeatType);
     }
   }
 
-  console.log(`[Queue] User ${userId} entering booking window. Assigned: ${assignedSeat}`);
-  res.json({ message: 'You can now start booking', assignedSeat, message });
+  console.log(`[Queue] User ${userId} entering booking. Seat type: ${assignedSeatType}`);
+  // assignedSeat kept for backward compat with frontend
+  res.json({ message: 'You can now start booking', assignedSeat: assignedSeatType, seatType: assignedSeatType, message });
 });
 
 /**
  * GET /api/seats/status
- * Returns booked seats.
+ * Returns booked seat types.
  */
 app.get('/api/seats/status', (req, res) => {
-  res.json({ bookedSeats });
+  res.json({ bookedSeatTypes });
 });
 
 /**
  * POST /api/booking/confirm
- * Body: { userId, assignedSeat, passengerData }
+ * Body: { userId, assignedSeat (seatType), seatType, passengerData, trainId, journeyDate }
  */
 app.post('/api/booking/confirm', (req, res) => {
-  const { userId, assignedSeat, passengerData } = req.body;
-  
-  // NOTE: previously pushed in enter-booking
-  if (assignedSeat && !bookedSeats.includes(assignedSeat)) {
-    bookedSeats.push(assignedSeat); // fallback
+  const { userId, passengerData } = req.body;
+
+  // Resolve seat type — frontend may send as assignedSeat OR seatType
+  const rawSeatType = req.body.seatType || req.body.assignedSeat || null;
+  const seatType = rawSeatType ? String(rawSeatType).replace(/^seat_/i, '') : null;
+
+  // Ensure it's tracked as booked (fallback if enter-booking wasn't called)
+  if (seatType && !bookedSeatTypes.includes(seatType)) {
+    bookedSeatTypes.push(seatType);
   }
-  
+
+  // Auto-generate a seat number
+  const seatNumber = getNextSeatNumber();
+
   // ── Save ticket for this user ───────────────────────────────────────────────
   userTickets[userId] = {
     passengerName : passengerData?.name || 'Unknown',
     age           : passengerData?.age  || 'N/A',
-    train         : req.body.trainId    || 'TRN001',
+    trainId       : req.body.trainId    || 'TRN001',
     journeyDate   : req.body.journeyDate || new Date().toISOString(),
-    seatNumber    : assignedSeat ? String(assignedSeat).replace('seat_', '') : 'N/A',
-    seatType      : 'Confirmed',
+    seatType      : seatType            || 'General',
+    seatNumber    : seatNumber,
+    status        : 'Confirmed',
   };
-  
-  // QUEUE SAFETY CHECK: After booking confirmation: queue.shift()
+
+  // QUEUE SAFETY CHECK: After booking confirmation: queue.shift() — DO NOT MODIFY
   if (bookingQueue.length > 0 && String(bookingQueue[0].data.userId) === String(userId)) {
     bookingQueue.shift();
-    
-    // Then check if queue.length > 0
+
     if (bookingQueue.length > 0) {
       const nextUser = bookingQueue[0];
-      // allowBookingFor(nextUser) - polling logic on frontend handles this immediately
       console.log(`[Queue] Advanced queue. Next user is #1: ${nextUser.data.userId}`);
     } else {
       console.log(`[Queue] Advanced queue. Queue is now empty.`);
     }
   }
-  
-  console.log(`[Booking] User ${userId} confirmed booking. Seat: ${assignedSeat}`);
-  
+
+  console.log(`[Booking] User ${userId} confirmed. SeatType: ${seatType} | SeatNumber: ${seatNumber}`);
+
   res.json({
-    message: 'Booking confirmed successfully',
-    seat: assignedSeat,
-    passengerData
+    message     : 'Booking confirmed successfully',
+    seatType,
+    seatNumber,
+    passengerData,
+    ticket      : userTickets[userId],
   });
 });
 

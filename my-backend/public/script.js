@@ -269,12 +269,14 @@ async function loadUserTicket() {
         const t = data.ticket;
         document.getElementById('ticket-name').textContent  = t.passengerName || '—';
         document.getElementById('ticket-age').textContent   = t.age           || '—';
-        document.getElementById('ticket-train').textContent = `Train ${t.train}`;
+        // Support both field names (trainId is the new field; train was the old one)
+        document.getElementById('ticket-train').textContent = `Train ${t.trainId || t.train || '—'}`;
         document.getElementById('ticket-date').textContent  = t.journeyDate
-            ? new Date(t.journeyDate).toLocaleDateString()
+            ? new Date(t.journeyDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
             : '—';
         document.getElementById('ticket-seat').textContent  = t.seatNumber    || '—';
-        document.getElementById('ticket-type').textContent  = t.seatType      || 'Confirmed';
+        // Show the actual seat type (Lower / Middle / Upper), fall back to status
+        document.getElementById('ticket-type').textContent  = t.seatType      || t.status || 'Confirmed';
 
         if (ticket) ticket.classList.remove('hidden');
     } catch (err) {

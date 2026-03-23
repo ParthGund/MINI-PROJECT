@@ -573,27 +573,41 @@
 
         .finput,
         .fselect {
-            background: rgba(255, 255, 255, .04);
+            background-color: #0f172a;          /* opaque dark — required for select */
             border: 1px solid rgba(255, 255, 255, .10);
             border-radius: 10px;
             padding: 11px 13px;
             font-size: 14px;
-            color: #f1f5f9;
+            color: #e2e8f0;
             outline: none;
             transition: border-color .2s, box-shadow .2s;
             width: 100%;
             -webkit-appearance: none;
             appearance: none;
+            /* Tells the browser to use dark OS chrome for the native dropdown popup */
+            color-scheme: dark;
         }
 
         .finput::placeholder {
             color: rgba(148, 163, 184, .32);
         }
 
+        /* Style the native option list (Chromium / Firefox) */
+        .fselect option {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .fselect option:hover,
+        .fselect option:checked {
+            background-color: #1e3a5f;
+            color: #38bdf8;
+        }
+
         .finput:focus,
         .fselect:focus {
-            border-color: rgba(14, 165, 233, .5);
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, .10);
+            border-color: rgba(56, 189, 248, .55);    /* #38bdf8 at 55% */
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, .12);
         }
 
         .finput.err,
