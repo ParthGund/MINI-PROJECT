@@ -1,0 +1,6 @@
+.env
+my-backend/.env
+node_modules/
+my-backend/node_modules/
+.vscode/
+.claude/
