@@ -32,7 +32,7 @@ function randomBookedSet(total, count) {
     return set;
 }
 
-// Assign a seat type based on position within a coach berth pattern (LB/MB/UB repeating)
+
 function getSeatType(seatNumber) {
     const types = ['LB', 'MB', 'UB', 'LB', 'MB', 'UB'];
     return types[(seatNumber - 1) % 6];
