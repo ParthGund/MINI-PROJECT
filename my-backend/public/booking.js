@@ -43,32 +43,23 @@ const PREF_OPTIONS = [
     { value: 'none', label: 'No Preference' },
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  URL params
-// ─────────────────────────────────────────────────────────────────────────────
 
 const _p = new URLSearchParams(window.location.search);
 const trainId = _p.get('trainId') || '';
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Auth guard
-// ─────────────────────────────────────────────────────────────────────────────
+
 
 (function authGuard() {
     if (!localStorage.getItem(TOKEN_KEY)) window.location.replace('index.html');
     if (!trainId) window.location.replace('search.html');
 })();
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Mutable state
-// ─────────────────────────────────────────────────────────────────────────────
 
-let bookingType = 'normal';   // 'normal' | 'tatkal'
-let passengerCount = 1;          // 1 … MAX_PAX[bookingType]
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Sidebar
-// ─────────────────────────────────────────────────────────────────────────────
+let bookingType = 'normal';   
+let passengerCount = 1;          
+
+
 
 function initUserChip() {
     try {
