@@ -364,7 +364,7 @@ async function boot() {
   const params = new URLSearchParams(window.location.search);
   const trainId = params.get('trainId');
   if (!trainId) {
-    window.location.replace('search.html');
+    window.location.replace('live-search.html');
     return;
   }
 

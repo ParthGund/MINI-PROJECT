@@ -62,7 +62,7 @@ const selectedSeats = rawSeats ? rawSeats.split(',').map(Number).filter(Boolean)
 
 (function authGuard() {
     if (!localStorage.getItem(TOKEN_KEY)) { window.location.replace('index.html'); }
-    if (!trainId) { window.location.replace('search.html'); }
+    if (!trainId) { window.location.replace('live-search.html'); }
 })();
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -471,7 +471,7 @@ function showSuccessModal(passengers) {
 function closeSuccessModal() {
     const modal = document.getElementById('success-modal');
     if (modal) modal.classList.remove('show');
-    window.location.href = 'search.html';
+    window.location.href = 'live-search.html';
 }
 
 // Clicking the backdrop also closes the modal

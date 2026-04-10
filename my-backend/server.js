@@ -9,6 +9,7 @@ const { getBookingStatus } = require('./timing');
 
 const userRoutes = require('./routes/userRoutes');
 const trainRoutes = require('./routes/trainRoutes');
+const liveTrainRoutes = require('./routes/liveTrainRoutes');
 
 // ── In-memory booking queue (shared across all connected clients) ──────────────
 const bookingQueue = [];   // stores entries in FIFO order
@@ -42,6 +43,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ── API Routes ──
 app.use('/api/users', userRoutes);
 app.use('/api/trains', trainRoutes);
+app.use('/api/live', liveTrainRoutes);
 
 // Booking status (relative to server start time)
 app.get('/api/booking/status', (req, res) => {

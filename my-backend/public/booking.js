@@ -4,7 +4,7 @@
  * booking.js — RailConnect Unified Booking Module
  *
  * FLOW:
- *   search.html → (Book clicked) → booking.html?trainId=X
+ *   live-search.html → (Book clicked) → booking.html?trainId=X
  *
  * THIS PAGE HANDLES (in order):
  *   1. Journey date selection   — date picker, today → today+60 days
@@ -51,7 +51,7 @@ const trainId = _p.get('trainId') || '';
 
 (function authGuard() {
     if (!localStorage.getItem(TOKEN_KEY)) window.location.replace('index.html');
-    if (!trainId) window.location.replace('search.html');
+    if (!trainId) window.location.replace('live-search.html');
 })();
 
 
@@ -80,14 +80,7 @@ function logout() {
     window.location.replace('index.html');
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Train info strip
-// ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Fetch the selected train from the API and populate the info strip.
- * Fails gracefully — shows trainId if the fetch errors.
- */
 async function populateTrainStrip() {
     const nameEl = document.getElementById('ts-name');
     const routeEl = document.getElementById('ts-route');
@@ -487,7 +480,7 @@ function showModal(data) {
 
 function closeModal() {
     document.getElementById('success-modal')?.classList.remove('show');
-    window.location.href = 'search.html';
+    window.location.href = 'live-search.html';
 }
 
 // Close on backdrop click
