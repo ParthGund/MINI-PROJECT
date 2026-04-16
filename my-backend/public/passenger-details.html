@@ -4,13 +4,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RailConnect — Passenger Details</title>
-    <meta name="description" content="Enter passenger details to complete your RailConnect train booking." />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wgh
-    t@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>RailConnect — Passenger Selection</title>
+    <meta name="description" content="Select passengers for your RailConnect train booking." />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
 
     <style>
-        /* ── Reset ─────────────────────────────────────────────────────────── */
         *,
         *::before,
         *::after {
@@ -27,7 +26,6 @@
             display: flex;
         }
 
-        /* ── Background ────────────────────────────────────────────────────── */
         .bg-layer {
             position: fixed;
             inset: 0;
@@ -48,7 +46,7 @@
             background-size: 40px 40px;
         }
 
-        /* ── Sidebar ───────────────────────────────────────────────────────── */
+        /* ── Sidebar ─────────────────────────────────────────────── */
         .sidebar {
             width: 260px;
             min-height: 100vh;
@@ -214,7 +212,7 @@
             color: #f87171;
         }
 
-        /* ── Main ──────────────────────────────────────────────────────────── */
+        /* ── Main ────────────────────────────────────────────────── */
         .main {
             flex: 1;
             display: flex;
@@ -224,7 +222,6 @@
             overflow-y: auto;
         }
 
-        /* ── Topbar ────────────────────────────────────────────────────────── */
         .topbar {
             display: flex;
             align-items: center;
@@ -272,15 +269,8 @@
         }
 
         @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1
-            }
-
-            50% {
-                opacity: .4
-            }
+            0%, 100% { opacity: 1 }
+            50% { opacity: .4 }
         }
 
         .hamburger {
@@ -292,7 +282,6 @@
             padding: 4px;
         }
 
-        /* ── Content area ──────────────────────────────────────────────────── */
         .content {
             padding: 32px;
             max-width: 860px;
@@ -300,7 +289,7 @@
             margin: 0 auto;
         }
 
-        /* ── Back button ───────────────────────────────────────────────────── */
+        /* ── Back button ─────────────────────────────────────────── */
         .back-btn {
             display: inline-flex;
             align-items: center;
@@ -323,7 +312,7 @@
             color: #e2e8f0;
         }
 
-        /* ── Train summary strip ────────────────────────────────────────────── */
+        /* ── Train summary strip ─────────────────────────────────── */
         .train-summary {
             display: flex;
             align-items: center;
@@ -372,164 +361,338 @@
             color: #6ee7b7;
         }
 
-        /* ── Page heading ───────────────────────────────────────────────────── */
-        .page-header {
-            margin-bottom: 24px;
+        /* ── Section cards ────────────────────────────────────────── */
+        .section-card {
+            background: rgba(15, 23, 42, .95);
+            border: 1px solid rgba(148, 163, 184, .12);
+            border-radius: 20px;
+            padding: 24px 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, .35);
+            margin-bottom: 20px;
+            animation: fadeUp .35s ease both;
         }
 
-        .page-header h1 {
-            font-size: 24px;
-            font-weight: 800;
-            color: #f1f5f9;
-            margin-bottom: 6px;
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px) }
+            to { opacity: 1; transform: none }
         }
 
-        .page-header p {
-            font-size: 13px;
-            color: rgba(148, 163, 184, .65);
-        }
-
-        /* ── Count selector ─────────────────────────────────────────────────── */
-        .count-section {
-            background: rgba(255, 255, 255, .025);
-            border: 1px solid rgba(255, 255, 255, .08);
-            border-radius: 16px;
-            padding: 22px 26px;
-            margin-bottom: 28px;
-        }
-
-        .count-section h2 {
+        .section-card h3 {
             font-size: 14px;
             font-weight: 700;
             color: #e2e8f0;
             margin-bottom: 4px;
         }
 
-        .count-section p {
+        .section-card .desc {
             font-size: 12px;
             color: rgba(148, 163, 184, .55);
             margin-bottom: 16px;
         }
 
-        .count-btns {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+        /* ── Limit badge ──────────────────────────────────────── */
+        .limit-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 8px;
+            margin-bottom: 16px;
         }
 
-        .count-btn {
-            width: 46px;
-            height: 46px;
-            border-radius: 12px;
+        .limit-ok {
+            background: rgba(52, 211, 153, .12);
+            border: 1px solid rgba(52, 211, 153, .25);
+            color: #6ee7b7;
+        }
+
+        .limit-max {
+            background: rgba(251, 191, 36, .12);
+            border: 1px solid rgba(251, 191, 36, .25);
+            color: #fde68a;
+        }
+
+        /* ── Dropdown / select ────────────────────────────────── */
+        .pax-dropdown {
+            width: 100%;
+            background-color: #0f172a;
             border: 1px solid rgba(255, 255, 255, .12);
-            background: rgba(255, 255, 255, .05);
-            color: #94a3b8;
-            font-size: 17px;
-            font-weight: 700;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 14px;
+            color: #e2e8f0;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            -webkit-appearance: none;
+            appearance: none;
+            color-scheme: dark;
+            cursor: pointer;
+        }
+
+        .pax-dropdown:focus {
+            border-color: rgba(56, 189, 248, .55);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, .12);
+        }
+
+        .pax-dropdown option {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+
+        /* ── Buttons ──────────────────────────────────────────── */
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(14, 165, 233, .35);
+            background: rgba(14, 165, 233, .10);
+            color: #38bdf8;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
             transition: all .2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .count-btn:hover {
-            background: rgba(14, 165, 233, .15);
-            border-color: rgba(14, 165, 233, .4);
-            color: #38bdf8;
+        .btn-add:hover:not(:disabled) {
+            background: rgba(14, 165, 233, .20);
+            border-color: rgba(14, 165, 233, .55);
             transform: translateY(-1px);
         }
 
-        .count-btn.active {
-            background: linear-gradient(135deg, rgba(14, 165, 233, .28), rgba(6, 182, 212, .18));
-            border-color: rgba(14, 165, 233, .55);
-            color: #38bdf8;
-            box-shadow: 0 4px 16px rgba(14, 165, 233, .22);
-            transform: translateY(-2px);
+        .btn-add:disabled {
+            opacity: .4;
+            cursor: not-allowed;
         }
 
-        /* ── Passengers container ────────────────────────────────────────────── */
-        #passengers-container {
+        .btn-add-sm {
+            padding: 8px 14px;
+            font-size: 12px;
+        }
+
+        /* ── Selected passenger list ──────────────────────────── */
+        .pax-list {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            margin-bottom: 28px;
+            gap: 10px;
         }
 
-        /* ── Passenger card ─────────────────────────────────────────────────── */
-        .pcard {
-            background: rgba(15, 23, 42, .95);
-            border: 1px solid rgba(148, 163, 184, .12);
-            border-radius: 20px;
-            padding: 28px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, .35);
-            animation: fadeUp .35s ease both;
-        }
-
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(14px)
-            }
-
-            to {
-                opacity: 1;
-                transform: none
-            }
-        }
-
-        /* card header */
-        .pcard-header {
+        .pax-chip {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 22px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, .06);
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, .035);
+            border: 1px solid rgba(255, 255, 255, .08);
+            transition: all .25s;
+            animation: fadeUp .3s ease both;
         }
 
-        .pcard-badge {
-            width: 36px;
-            height: 36px;
+        .pax-chip:hover {
+            background: rgba(255, 255, 255, .06);
+            border-color: rgba(255, 255, 255, .14);
+        }
+
+        .pax-chip .pax-num {
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: linear-gradient(135deg, #0ea5e9, #06b6d4);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 800;
             color: #fff;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, .3);
             flex-shrink: 0;
         }
 
-        .pcard-header h3 {
-            font-size: 15px;
-            font-weight: 700;
+        .pax-chip .pax-info {
+            flex: 1;
+        }
+
+        .pax-chip .pax-name {
+            font-size: 14px;
+            font-weight: 600;
             color: #e2e8f0;
         }
 
-        .pcard-header p {
+        .pax-chip .pax-meta {
             font-size: 12px;
-            color: rgba(148, 163, 184, .5);
+            color: rgba(148, 163, 184, .6);
             margin-top: 1px;
         }
 
-        /* ── Field rows inside card ─────────────────────────────────────────── */
-        /* Row 1: Name (wide) | Age | Gender */
-        .row-personal {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 14px;
-            margin-bottom: 20px;
+        .pax-chip .pax-primary {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: #38bdf8;
+            background: rgba(14, 165, 233, .12);
+            border: 1px solid rgba(14, 165, 233, .25);
+            padding: 2px 8px;
+            border-radius: 6px;
         }
 
-        /* Row 2: divider heading */
+        .pax-remove {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, .2);
+            background: rgba(239, 68, 68, .08);
+            color: #f87171;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .2s;
+            flex-shrink: 0;
+        }
+
+        .pax-remove:hover {
+            background: rgba(239, 68, 68, .18);
+            border-color: rgba(239, 68, 68, .4);
+        }
+
+        .pax-empty {
+            text-align: center;
+            padding: 24px;
+            color: rgba(148, 163, 184, .4);
+            font-size: 13px;
+        }
+
+        /* ── Inline form (add new passenger) ──────────────────── */
+        .inline-form {
+            display: none;
+            padding: 20px;
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 14px;
+            margin-top: 14px;
+            animation: fadeUp .25s ease both;
+        }
+
+        .inline-form.show { display: block; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .fgroup {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .flabel {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(148, 163, 184, .75);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .finput,
+        .fselect {
+            background-color: #0f172a;
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 14px;
+            color: #e2e8f0;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            color-scheme: dark;
+        }
+
+        .finput::placeholder { color: rgba(148, 163, 184, .32); }
+        .fselect option { background-color: #0f172a; color: #e2e8f0; }
+
+        .finput:focus,
+        .fselect:focus {
+            border-color: rgba(56, 189, 248, .55);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, .12);
+        }
+
+        .finput.err,
+        .fselect.err {
+            border-color: rgba(239, 68, 68, .5);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, .08);
+        }
+
+        .ferr {
+            font-size: 11px;
+            color: #f87171;
+            display: none;
+        }
+
+        .ferr.on { display: block; }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .cb-save {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: rgba(148, 163, 184, .7);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .cb-save input[type="checkbox"] {
+            accent-color: #0ea5e9;
+            width: 15px;
+            height: 15px;
+        }
+
+        .btn-cancel {
+            padding: 9px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, .2);
+            background: transparent;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(148, 163, 184, .08);
+            color: #e2e8f0;
+        }
+
+        /* ── Seat preferences row ──────────────────────────────── */
+        .pref-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
         .prefs-divider {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
+            margin-top: 4px;
         }
 
         .prefs-divider span {
@@ -549,103 +712,7 @@
             background: rgba(255, 255, 255, .06);
         }
 
-        /* Row 3: Prefs 1 | 2 | 3 */
-        .row-prefs {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-        }
-
-        /* shared field group */
-        .fgroup {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .flabel {
-            font-size: 11px;
-            font-weight: 600;
-            color: rgba(148, 163, 184, .75);
-            text-transform: uppercase;
-            letter-spacing: .04em;
-        }
-
-        .finput,
-        .fselect {
-            background-color: #0f172a;          /* opaque dark — required for select */
-            border: 1px solid rgba(255, 255, 255, .10);
-            border-radius: 10px;
-            padding: 11px 13px;
-            font-size: 14px;
-            color: #e2e8f0;
-            outline: none;
-            transition: border-color .2s, box-shadow .2s;
-            width: 100%;
-            -webkit-appearance: none;
-            appearance: none;
-            /* Tells the browser to use dark OS chrome for the native dropdown popup */
-            color-scheme: dark;
-        }
-
-        .finput::placeholder {
-            color: rgba(148, 163, 184, .32);
-        }
-
-        /* Style the native option list (Chromium / Firefox) */
-        .fselect option {
-            background-color: #0f172a;
-            color: #e2e8f0;
-        }
-
-        .fselect option:hover,
-        .fselect option:checked {
-            background-color: #1e3a5f;
-            color: #38bdf8;
-        }
-
-        .finput:focus,
-        .fselect:focus {
-            border-color: rgba(56, 189, 248, .55);    /* #38bdf8 at 55% */
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, .12);
-        }
-
-        .finput.err,
-        .fselect.err {
-            border-color: rgba(239, 68, 68, .5);
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, .08);
-        }
-
-        /* inline field error */
-        .ferr {
-            font-size: 11px;
-            color: #f87171;
-            margin-top: 2px;
-            display: none;
-        }
-
-        .ferr.on {
-            display: block;
-        }
-
-        /* ── Global error / alert ───────────────────────────────────────────── */
-        .alert-box {
-            border-radius: 12px;
-            padding: 14px 18px;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .alert-err {
-            background: rgba(239, 68, 68, .12);
-            border: 1px solid rgba(239, 68, 68, .25);
-            color: #fca5a5;
-        }
-
-        /* ── Enter Queue button ─────────────────────────────────────────────── */
+        /* ── Main CTA button ──────────────────────────────────── */
         .btn-queue {
             width: 100%;
             padding: 17px 28px;
@@ -678,20 +745,11 @@
         }
 
         @keyframes gradShift {
-            0% {
-                background-position: 0 50%
-            }
-
-            50% {
-                background-position: 100% 50%
-            }
-
-            100% {
-                background-position: 0 50%
-            }
+            0% { background-position: 0 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0 50% }
         }
 
-        /* ── Spinner ────────────────────────────────────────────────────────── */
         .spin {
             display: inline-block;
             width: 18px;
@@ -704,12 +762,41 @@
         }
 
         @keyframes sp {
-            to {
-                transform: rotate(360deg)
-            }
+            to { transform: rotate(360deg) }
         }
 
-        /* ── Success modal ──────────────────────────────────────────────────── */
+        /* ── Global alert ─────────────────────────────────────── */
+        .alert-box {
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .alert-err {
+            background: rgba(239, 68, 68, .12);
+            border: 1px solid rgba(239, 68, 68, .25);
+            color: #fca5a5;
+        }
+
+        /* ── Loading skeleton ─────────────────────────────────── */
+        .loading-bar {
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, rgba(255,255,255,.04) 25%, rgba(255,255,255,.08) 50%, rgba(255,255,255,.04) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s ease infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0 }
+            100% { background-position: -200% 0 }
+        }
+
+        /* ── Success / Queue status modal ──────────────────────── */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -810,45 +897,7 @@
             border-color: rgba(52, 211, 153, .5);
         }
 
-        /* ── Responsive ─────────────────────────────────────────────────────── */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: -260px;
-                height: 100%;
-                z-index: 50;
-                transition: left .3s;
-                width: 260px;
-            }
-
-            .sidebar.open {
-                left: 0;
-            }
-
-            .hamburger {
-                display: block;
-            }
-
-            .content {
-                padding: 20px 16px;
-            }
-
-            .topbar {
-                padding: 16px 20px;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .row-personal {
-                grid-template-columns: 1fr;
-            }
-
-            .row-prefs {
-                grid-template-columns: 1fr;
-            }
-        }
-        /* ── Queue status panel (shown after joining queue) ─────────────────── */
+        /* ── Queue status panel ───────────────────────────────── */
         .queue-status-panel {
             display: none;
             background: linear-gradient(135deg, rgba(129, 140, 248, .12), rgba(99, 102, 241, .06));
@@ -858,61 +907,28 @@
             animation: fadeUp .4s ease both;
         }
 
-        .queue-status-panel.show {
-            display: block;
-        }
+        .queue-status-panel.show { display: block; }
 
-        .qs-title {
-            font-size: 18px;
-            font-weight: 800;
-            color: #e2e8f0;
-            margin-bottom: 6px;
-        }
+        .qs-title { font-size: 18px; font-weight: 800; color: #e2e8f0; margin-bottom: 6px; }
+        .qs-sub { font-size: 13px; color: rgba(148, 163, 184, .7); margin-bottom: 22px; }
+        .qs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+        .qs-cell { background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .08); border-radius: 12px; padding: 16px; text-align: center; }
+        .qs-cell .qs-val { font-size: 26px; font-weight: 800; color: #a5b4fc; line-height: 1; margin-bottom: 4px; }
+        .qs-cell .qs-lbl { font-size: 11px; font-weight: 600; color: rgba(148, 163, 184, .55); text-transform: uppercase; letter-spacing: .06em; }
+        .qs-note { font-size: 12px; color: rgba(148, 163, 184, .5); text-align: center; }
 
-        .qs-sub {
-            font-size: 13px;
-            color: rgba(148, 163, 184, .7);
-            margin-bottom: 22px;
-        }
-
-        .qs-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-            margin-bottom: 20px;
-        }
-
-        .qs-cell {
-            background: rgba(255, 255, 255, .04);
-            border: 1px solid rgba(255, 255, 255, .08);
-            border-radius: 12px;
-            padding: 16px;
-            text-align: center;
-        }
-
-        .qs-cell .qs-val {
-            font-size: 26px;
-            font-weight: 800;
-            color: #a5b4fc;
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-
-        .qs-cell .qs-lbl {
-            font-size: 11px;
-            font-weight: 600;
-            color: rgba(148, 163, 184, .55);
-            text-transform: uppercase;
-            letter-spacing: .06em;
-        }
-
-        .qs-note {
-            font-size: 12px;
-            color: rgba(148, 163, 184, .5);
-            text-align: center;
+        /* ── Responsive ───────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; top: 0; left: -260px; height: 100%; z-index: 50; transition: left .3s; width: 260px; }
+            .sidebar.open { left: 0; }
+            .hamburger { display: block; }
+            .content { padding: 20px 16px; }
+            .topbar { padding: 16px 20px; }
         }
 
         @media (max-width: 640px) {
+            .form-row { grid-template-columns: 1fr; }
+            .pref-row { grid-template-columns: 1fr; }
             .qs-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -922,7 +938,7 @@
     <div class="bg-layer"></div>
     <div class="grid-ov"></div>
 
-    <!-- ─── Sidebar ──────────────────────────────────────────────────────── -->
+    <!-- ─── Sidebar ──────────────────────────────────────────── -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
             <div class="logoi">
@@ -974,7 +990,7 @@
         </div>
     </aside>
 
-    <!-- ─── Main ─────────────────────────────────────────────────────────── -->
+    <!-- ─── Main ─────────────────────────────────────────────── -->
     <div class="main">
         <header class="topbar">
             <div style="display:flex;align-items:center;gap:12px">
@@ -987,8 +1003,8 @@
                     </svg>
                 </button>
                 <div class="topbar-title">
-                    <h2>Passenger Details</h2>
-                    <p id="topbar-pd-subtitle">Fill in the details for each traveller</p>
+                    <h2>Select Passengers</h2>
+                    <p id="topbar-pd-subtitle">Add passengers from saved profiles or create new</p>
                 </div>
             </div>
             <div class="status-badge"><span class="status-dot"></span>API Connected</div>
@@ -997,7 +1013,7 @@
         <div class="content">
 
             <!-- 1. Back button -->
-            <button class="back-btn" onclick="goBack()">
+            <button class="back-btn" onclick="goBack()" id="back-btn">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path d="M19 12H5" />
                     <path d="m12 19-7-7 7-7" />
@@ -1015,41 +1031,134 @@
                 <div id="summary-seats" style="font-size:13px;font-weight:600;color:#38bdf8;"></div>
             </div>
 
-            <!-- 3. Page heading -->
-            <div class="page-header">
-                <h1>How many passengers are travelling?</h1>
-                <p id="count-hint">Select the number of passengers. Each passenger will have their own form below.</p>
+            <!-- 3. Limit badge -->
+            <div id="limit-badge" class="limit-badge limit-ok">
+                <span id="limit-text">0 / 6 passengers</span>
             </div>
 
-            <!-- 4. Count selector -->
-            <div class="count-section">
-                <h2>Number of Passengers</h2>
-                <p id="count-description">Normal booking: up to 6 passengers. Tatkal: up to 4 passengers.</p>
-                <div class="count-btns" id="count-btns" role="group" aria-label="Select passenger count">
-                    <!-- injected by JS -->
+            <!-- SECTION 1: Add from saved passengers -->
+            <div class="section-card" id="saved-section" style="animation-delay: 0ms">
+                <h3>📋 Add Registered Passenger</h3>
+                <p class="desc">Quickly add a passenger from your saved profiles</p>
+                <div id="saved-loading" class="loading-bar" style="margin-bottom:10px"></div>
+                <select class="pax-dropdown" id="saved-dropdown" style="display:none">
+                    <option value="">— Select a saved passenger —</option>
+                </select>
+                <div id="no-saved-msg" style="display:none;font-size:12px;color:rgba(148,163,184,.5);margin-top:8px;">
+                    No saved passengers yet. Add one below!
                 </div>
             </div>
 
-            <!-- 5. Passenger forms — each card contains Name, Age, Gender, Pref 1, 2, 3 -->
-            <div id="passengers-container">
-                <!-- injected by JS -->
+            <!-- SECTION 2: Add new passenger -->
+            <div class="section-card" id="add-section" style="animation-delay: 60ms">
+                <h3>➕ Add New Passenger</h3>
+                <p class="desc">Fill details to add a passenger to this booking</p>
+                <button class="btn-add" id="btn-show-form">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    Add Passenger
+                </button>
+
+                <div class="inline-form" id="new-pax-form">
+                    <div class="form-row">
+                        <div class="fgroup">
+                            <label class="flabel" for="new-name">Full Name</label>
+                            <input type="text" id="new-name" class="finput" placeholder="e.g. Priya Sharma"
+                                autocomplete="off" />
+                            <span class="ferr" id="new-name-err">Name is required.</span>
+                        </div>
+                        <div class="fgroup">
+                            <label class="flabel" for="new-age">Age</label>
+                            <input type="number" id="new-age" class="finput" placeholder="e.g. 28" min="1" max="120" />
+                            <span class="ferr" id="new-age-err">Valid age required.</span>
+                        </div>
+                        <div class="fgroup">
+                            <label class="flabel" for="new-gender">Gender</label>
+                            <select id="new-gender" class="fselect">
+                                <option value="">Select…</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <span class="ferr" id="new-gender-err">Select gender.</span>
+                        </div>
+                    </div>
+
+                    <div class="prefs-divider"><span>Seat Preferences (optional)</span></div>
+                    <div class="pref-row">
+                        <div class="fgroup">
+                            <label class="flabel" for="new-pref1">1st Preference</label>
+                            <select id="new-pref1" class="fselect">
+                                <option value="none">No Preference</option>
+                                <option value="lower">Lower Berth</option>
+                                <option value="middle">Middle Berth</option>
+                                <option value="upper">Upper Berth</option>
+                                <option value="window">Window</option>
+                            </select>
+                        </div>
+                        <div class="fgroup">
+                            <label class="flabel" for="new-pref2">2nd Preference</label>
+                            <select id="new-pref2" class="fselect">
+                                <option value="none">No Preference</option>
+                                <option value="lower">Lower Berth</option>
+                                <option value="middle">Middle Berth</option>
+                                <option value="upper">Upper Berth</option>
+                                <option value="window">Window</option>
+                            </select>
+                        </div>
+                        <div class="fgroup">
+                            <label class="flabel" for="new-pref3">3rd Preference</label>
+                            <select id="new-pref3" class="fselect">
+                                <option value="none">No Preference</option>
+                                <option value="lower">Lower Berth</option>
+                                <option value="middle">Middle Berth</option>
+                                <option value="upper">Upper Berth</option>
+                                <option value="window">Window</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-add btn-add-sm" id="btn-add-pax" type="button">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path d="M5 12h14" /><path d="M12 5v14" />
+                            </svg>
+                            Add to Booking
+                        </button>
+                        <label class="cb-save">
+                            <input type="checkbox" id="cb-save-profile" checked />
+                            Save to my profiles
+                        </label>
+                        <button class="btn-cancel" id="btn-cancel-form" type="button">Cancel</button>
+                    </div>
+                </div>
             </div>
 
-            <!-- 6. Global validation error -->
+            <!-- SECTION 3: Selected passengers list -->
+            <div class="section-card" id="list-section" style="animation-delay: 120ms">
+                <h3>🧳 Selected Passengers</h3>
+                <p class="desc" id="list-desc">Passengers added to this booking will appear here</p>
+                <div class="pax-list" id="pax-list">
+                    <div class="pax-empty" id="pax-empty">No passengers added yet</div>
+                </div>
+            </div>
+
+            <!-- Global error -->
             <div id="global-error" style="margin-bottom:20px;"></div>
 
-            <!-- 7. Main CTA button — label set by JS based on mode -->
-            <button class="btn-queue" id="enter-queue-btn" onclick="enterBookingQueue()">
+            <!-- Main CTA -->
+            <button class="btn-queue" id="enter-queue-btn" disabled>
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                     <circle cx="9" cy="7" r="4" />
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
-                <span id="cta-btn-label">Loading…</span>
+                <span id="cta-btn-label">Add at least 1 passenger</span>
             </button>
 
-            <!-- 8. Queue status panel — shown after user joins the queue -->
+            <!-- Queue status panel (after joining) -->
             <div class="queue-status-panel" id="queue-status-panel" role="status" aria-live="polite">
                 <div class="qs-title">🟣 You are in the booking queue</div>
                 <div class="qs-sub">Your details have been submitted. Please wait for your booking to be processed.</div>
@@ -1073,7 +1182,7 @@
         </div><!-- /.content -->
     </div><!-- /.main -->
 
-    <!-- ─── Success Modal ────────────────────────────────────────────────── -->
+    <!-- ─── Success Modal ────────────────────────────────────── -->
     <div class="modal-overlay" id="success-modal" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
         <div class="modal-box">
             <div class="modal-check">
@@ -1086,7 +1195,7 @@
                 Your request has been submitted successfully.
             </p>
             <div class="modal-detail" id="modal-detail-block">
-                <!-- passenger summary injected by JS -->
+                <!-- injected by JS -->
             </div>
             <button class="btn-modal-close" onclick="closeSuccessModal()">Done</button>
         </div>

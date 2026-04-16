@@ -10,6 +10,7 @@ const { getBookingStatus } = require('./timing');
 const userRoutes = require('./routes/userRoutes');
 const trainRoutes = require('./routes/trainRoutes');
 const liveTrainRoutes = require('./routes/liveTrainRoutes');
+const passengerRoutes = require('./routes/passengerRoutes');
 
 // ── In-memory booking queue (shared across all connected clients) ──────────────
 const bookingQueue = [];   // stores entries in FIFO order
@@ -44,6 +45,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/users', userRoutes);
 app.use('/api/trains', trainRoutes);
 app.use('/api/live', liveTrainRoutes);
+app.use('/api/passengers', passengerRoutes);
 
 // Booking status (relative to server start time)
 app.get('/api/booking/status', (req, res) => {
@@ -185,7 +187,7 @@ app.get('/api/seats/status', (req, res) => {
  * Body: { userId, assignedSeat (seatType), seatType, passengerData, trainId, journeyDate }
  */
 app.post('/api/booking/confirm', (req, res) => {
-  const { userId, passengerData } = req.body;
+  const { userId, passengerData, passengers } = req.body;
 
   // Resolve seat type — frontend may send as assignedSeat OR seatType
   const rawSeatType = req.body.seatType || req.body.assignedSeat || null;
@@ -199,15 +201,19 @@ app.post('/api/booking/confirm', (req, res) => {
   // Auto-generate a seat number
   const seatNumber = getNextSeatNumber();
 
-  // ── Save ticket for this user ───────────────────────────────────────────────
+  // ── Save ticket for this user — support multi-passenger array ─────────────
+  const paxList = passengers || (passengerData ? [passengerData] : []);
+  const primaryPax = paxList[0] || {};
+
   userTickets[userId] = {
-    passengerName : passengerData?.name || 'Unknown',
-    age           : passengerData?.age  || 'N/A',
+    passengerName : primaryPax.name || passengerData?.name || 'Unknown',
+    age           : primaryPax.age  || passengerData?.age  || 'N/A',
     trainId       : req.body.trainId    || 'TRN001',
     journeyDate   : req.body.journeyDate || new Date().toISOString(),
     seatType      : seatType            || 'General',
     seatNumber    : seatNumber,
     status        : 'Confirmed',
+    passengers    : paxList,
   };
 
   // QUEUE SAFETY CHECK: After booking confirmation: queue.shift() — DO NOT MODIFY
@@ -222,14 +228,15 @@ app.post('/api/booking/confirm', (req, res) => {
     }
   }
 
-  console.log(`[Booking] User ${userId} confirmed. SeatType: ${seatType} | SeatNumber: ${seatNumber}`);
+  console.log(`[Booking] User ${userId} confirmed. SeatType: ${seatType} | SeatNumber: ${seatNumber} | Passengers: ${paxList.length}`);
 
   res.json({
     message     : 'Booking confirmed successfully',
     seatType,
     seatNumber,
-    passengerData,
-    ticket      : userTickets[userId],
+    passengerData : primaryPax,
+    passengers    : paxList,
+    ticket        : userTickets[userId],
   });
 });
 
